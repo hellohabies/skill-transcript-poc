@@ -1,0 +1,209 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  TEACHER
+  STUDENT
+  ADMIN
+}
+
+enum Sex {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  nameTitle String
+  firstName String
+  lastName  String
+  email     String   @unique
+  password  String
+  sex       Sex
+  role      Role
+  student   Student?
+  teacher   Teacher?
+  admin     Admin?
+}
+
+model University {
+  id             String    @id @default(cuid())
+  emblemImageSrc String
+  name           String
+  faculties      Faculty[]
+}
+
+model Faculty {
+  id           String       @id @default(cuid())
+  name         String
+  universityId String
+  university   University   @relation(fields: [universityId], references: [id])
+  curriculums  Curriculum[]
+}
+
+model Curriculum {
+  id          String    @id @default(cuid())
+  degreeName  String
+  programName String
+  facultyId   String
+  faculty     Faculty   @relation(fields: [facultyId], references: [id])
+  students    Student[]
+  teachers    Teacher[]
+  courses     Course[]
+}
+
+model Teacher {
+  id                     String          @id @default(cuid())
+  universityTeacherId    String
+  identificationNumber   String
+  affiliatedCurriculumId String
+  affiliatedCurriculum   Curriculum      @relation(fields: [affiliatedCurriculumId], references: [id])
+  userId                 String          @unique
+  user                   User            @relation(fields: [userId], references: [id])
+  courses                CourseTeacher[]
+}
+
+model Admin {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+enum CloType {
+  K
+  S
+  A
+}
+
+enum SkillType {
+  SPECIFIC
+  GENERAL
+  MAIN
+  OTHER
+}
+
+model CourseClo {
+  id       String  @id @default(cuid())
+  type     CloType
+  clo      String
+  courseId String
+  course   Course  @relation(fields: [courseId], references: [id])
+}
+
+model SkillEvaluation {
+  id                 String     @id @default(cuid())
+  evaluation         String
+  evaluationCriteria String
+  skillLevelId       String
+  skillLevel         SkillLevel @relation(fields: [skillLevelId], references: [id])
+}
+
+model SkillLevel {
+  id                String            @id @default(cuid())
+  skillMappingRefId String
+  level             Int
+  titleTh           String
+  titleEn           String
+  skillEvaluations  SkillEvaluation[]
+}
+
+model Skill {
+  id                String    @id @default(cuid())
+  skillMappingRefId String
+  nameEn            String
+  nameTh            String
+  descriptionEn     String
+  descriptionTh     String
+  type              SkillType
+  isMainSkill       Boolean   @default(false)
+  courseId          String
+  course            Course    @relation(fields: [courseId], references: [id])
+  deletedAt         DateTime?
+}
+
+model CourseSection {
+  id       String          @id @default(cuid())
+  courseId String
+  course   Course          @relation(fields: [courseId], references: [id])
+  section  String
+  teachers CourseTeacher[]
+  students CourseStudent[]
+}
+
+model Course {
+  id                String          @id @default(cuid())
+  skillMappingRefId String
+  courseCode        String
+  nameEn            String
+  nameTh            String
+  descriptionEn     String
+  descriptionTh     String
+  curriculumId      String
+  curriculum        Curriculum      @relation(fields: [curriculumId], references: [id])
+  clos              CourseClo[]
+  teachers          CourseTeacher[]
+  sections          CourseSection[]
+  students          CourseStudent[]
+  skills            Skill[]
+}
+
+model CourseTeacher {
+  id              String         @id @default(cuid())
+  courseId        String
+  course          Course         @relation(fields: [courseId], references: [id])
+  teacherId       String
+  teacher         Teacher        @relation(fields: [teacherId], references: [id])
+  courseSectionId String
+  courseSection   CourseSection? @relation(fields: [courseSectionId], references: [id])
+}
+
+model CourseStudent {
+  id              String         @id @default(cuid())
+  courseId        String
+  course          Course         @relation(fields: [courseId], references: [id])
+  studentId       String
+  student         Student        @relation(fields: [studentId], references: [id])
+  courseSectionId String?
+  courseSection   CourseSection? @relation(fields: [courseSectionId], references: [id])
+}
+
+model Student {
+  id                     String          @id @default(cuid())
+  universityStudentId    String
+  identificationNumber   String
+  birthDate              DateTime
+  enrolledDate           DateTime
+  affiliatedCurriculumId String
+  affiliatedCurriculum   Curriculum      @relation(fields: [affiliatedCurriculumId], references: [id])
+  userId                 String          @unique
+  user                   User            @relation(fields: [userId], references: [id])
+  courses                CourseStudent[]
+
+  @@unique([universityStudentId, affiliatedCurriculumId])
+}
+
+// model GradeReportSkill {
+
+// }
+
+// model GradeReportClo {
+
+// }
+
+model GradeReport {
+  id        String    @id @default(cuid())
+  deletedAt DateTime?
+}
