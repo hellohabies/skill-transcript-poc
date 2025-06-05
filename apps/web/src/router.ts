@@ -5,10 +5,14 @@ import { components, hooks, utils } from '@generouted/react-router/client'
 
 export type Path =
   | `/`
+  | `/faculties`
+  | `/faculties/:facultyId/curriculums`
+  | `/faculties/:facultyId/curriculums/:curriculumId`
   | `/home`
 
 export type Params = {
-  
+  '/faculties/:facultyId/curriculums': { facultyId: string }
+  '/faculties/:facultyId/curriculums/:curriculumId': { facultyId: string; curriculumId: string }
 }
 
 export type ModalPath = never

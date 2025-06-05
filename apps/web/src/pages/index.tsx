@@ -14,7 +14,7 @@ function HomePage() {
 
   if (authUser) {
     if (authUserRole === "ADMIN") {
-      window.location.href = "/courses";
+      window.location.href = "/faculties";
     }
 
     if (authUserRole === "STUDENT" || authUserRole === "TEACHER") {

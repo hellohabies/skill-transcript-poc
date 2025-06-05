@@ -1,4 +1,4 @@
-import { BookIcon } from "lucide-react";
+import { HomeIcon } from "lucide-react";
 export const ACTIVE_ICON_PROPS = {
   strokeWidth: 3,
   size: 20,
@@ -11,16 +11,12 @@ export const INACTIVE_ICON_PROPS = {
 export const SYSTEM_ADMIN_SIDEBAR_ITEMS = [
   [
     {
-      type: "LABEL",
-      label: "รายวิชาและหลักสูตร",
-    },
-    {
       type: "ITEM",
-      label: "รายวิชา",
+      label: "หน้าแรก",
 
-      url: "/courses",
-      activeIcon: <BookIcon {...ACTIVE_ICON_PROPS} />,
-      inActiveIcon: <BookIcon {...INACTIVE_ICON_PROPS} />,
+      url: "/faculties",
+      activeIcon: <HomeIcon {...ACTIVE_ICON_PROPS} />,
+      inActiveIcon: <HomeIcon {...INACTIVE_ICON_PROPS} />,
     },
   ],
 ];
