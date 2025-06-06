@@ -1,0 +1,356 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table User {
+  id String [pk]
+  nameTitle String [not null]
+  firstName String [not null]
+  lastName String [not null]
+  email String [unique, not null]
+  password String [not null]
+  sex Sex [not null]
+  role Role [not null]
+  student Student
+  teacher Teacher
+  admin Admin
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table University {
+  id String [pk]
+  emblemImageSrc String [not null]
+  name String [not null]
+  faculties Faculty [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table Faculty {
+  id String [pk]
+  name String [not null]
+  universityId String [not null]
+  university University [not null]
+  curriculums Curriculum [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table Curriculum {
+  id String [pk]
+  degreeName String [not null]
+  programName String [not null]
+  facultyId String [not null]
+  faculty Faculty [not null]
+  students Student [not null]
+  teachers Teacher [not null]
+  courses Course [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table Teacher {
+  id String [pk]
+  universityTeacherId String [not null]
+  identificationNumber String [not null]
+  affiliatedCurriculumId String [not null]
+  affiliatedCurriculum Curriculum [not null]
+  userId String [unique, not null]
+  user User [not null]
+  courses CourseTeacher [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table Admin {
+  id String [pk]
+  userId String [unique, not null]
+  user User [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table Clo {
+  id String [pk]
+  type CloType [not null]
+  name String [not null]
+  courseId String [not null]
+  course Course [not null]
+  GradingCloResult GradingCloResult [not null]
+  CloSkillLevelCriteria CloSkillLevelCriteria [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table Skill {
+  id String [pk]
+  skillMappingRefId String [not null]
+  nameTh String [not null]
+  nameEn String [not null]
+  descriptionTh String [not null]
+  descriptionEn String [not null]
+  type SkillType [not null]
+  isMainSkill Boolean [not null, default: false]
+  courseId String [not null]
+  course Course [not null]
+  skillLevels SkillLevel [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table SkillLevel {
+  id String [pk]
+  skillId String [not null]
+  skill Skill [not null]
+  level Int [not null, default: 1]
+  descriptionTh String [not null]
+  descriptionEn String [not null]
+  methods SkillLevelMethod [not null]
+  criterias SkillLevelCriteria [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table SkillLevelMethod {
+  id String [pk]
+  skillLevelId String [not null]
+  skillLevel SkillLevel [not null]
+  methodNameTh String [not null]
+  methodNameEn String [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table SkillLevelCriteria {
+  id String [pk]
+  skillLevelId String [not null]
+  skillLevel SkillLevel [not null]
+  criteriaNameTh String [not null]
+  criteriaNameEn String [not null]
+  cloSkillLevelCriterias CloSkillLevelCriteria [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table CloSkillLevelCriteria {
+  id String [pk]
+  courseId String [not null]
+  course Course [not null]
+  cloId String [not null]
+  clo Clo [not null]
+  skillLevelCriteriaId String [not null]
+  skillLevelCriteria SkillLevelCriteria [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table CourseSection {
+  id String [pk]
+  courseId String [not null]
+  course Course [not null]
+  section String [not null]
+  teachers CourseTeacher [not null]
+  students StudentCourse [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table CourseGradingCriteria {
+  id String [pk]
+  courseId String [not null]
+  course Course [not null]
+  grade Grade [not null]
+  minScore Float [not null]
+  maxScore Float [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table Course {
+  id String [pk]
+  skillMappingRefId String [not null]
+  courseCode String [not null]
+  nameEn String [not null]
+  nameTh String [not null]
+  descriptionEn String [not null]
+  descriptionTh String [not null]
+  curriculumId String [not null]
+  curriculum Curriculum [not null]
+  clos Clo [not null]
+  teachers CourseTeacher [not null]
+  sections CourseSection [not null]
+  students StudentCourse [not null]
+  gradingCriterias CourseGradingCriteria [not null]
+  skills Skill [not null]
+  cloSkillLevelCriterias CloSkillLevelCriteria [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table CourseTeacher {
+  id String [pk]
+  courseId String [not null]
+  course Course [not null]
+  teacherId String [not null]
+  teacher Teacher [not null]
+  courseSectionId String [not null]
+  courseSection CourseSection
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table StudentCourse {
+  id String [pk]
+  courseId String [not null]
+  course Course [not null]
+  studentId String [not null]
+  student Student [not null]
+  courseSectionId String
+  courseSection CourseSection
+  gradings StudentCourseGrading [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table Student {
+  id String [pk]
+  universityStudentId String [not null]
+  identificationNumber String [not null]
+  birthDate DateTime [not null]
+  enrolledDate DateTime [not null]
+  affiliatedCurriculumId String [not null]
+  affiliatedCurriculum Curriculum [not null]
+  userId String [unique, not null]
+  user User [not null]
+  courses StudentCourse [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+
+  indexes {
+    (universityStudentId, affiliatedCurriculumId) [unique]
+  }
+}
+
+Table StudentCourseGrading {
+  id String [pk]
+  studentCourseId String [not null]
+  studentCourse StudentCourse [not null]
+  gradingDate DateTime [not null]
+  grade Grade [not null, default: 'X']
+  score Float [not null, default: 0]
+  gradingCloResults GradingCloResult [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table GradingCloResult {
+  id String [pk]
+  studentCourseGradingId String [not null]
+  studentCourseGrading StudentCourseGrading [not null]
+  cloId String [not null]
+  clo Clo [not null]
+  result GradingResult [not null, default: 'X']
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Enum Role {
+  TEACHER
+  STUDENT
+  ADMIN
+}
+
+Enum Sex {
+  MALE
+  FEMALE
+  OTHER
+}
+
+Enum CloType {
+  K
+  S
+  A
+}
+
+Enum SkillType {
+  SPECIFIC
+  GENERAL
+  MAIN
+  OTHER
+}
+
+Enum Grade {
+  A
+  B_PLUS
+  B
+  C_PLUS
+  C
+  D_PLUS
+  D
+  F
+  X
+}
+
+Enum GradingResult {
+  FAIL
+  PASS
+  GOOD
+  VERY_GOOD
+  EXCELLENT
+  X
+}
+
+Ref: Faculty.universityId > University.id
+
+Ref: Curriculum.facultyId > Faculty.id
+
+Ref: Teacher.affiliatedCurriculumId > Curriculum.id
+
+Ref: Teacher.userId - User.id
+
+Ref: Admin.userId - User.id
+
+Ref: Clo.courseId > Course.id
+
+Ref: Skill.courseId > Course.id
+
+Ref: SkillLevel.skillId > Skill.id
+
+Ref: SkillLevelMethod.skillLevelId > SkillLevel.id
+
+Ref: SkillLevelCriteria.skillLevelId > SkillLevel.id
+
+Ref: CloSkillLevelCriteria.courseId > Course.id
+
+Ref: CloSkillLevelCriteria.cloId > Clo.id
+
+Ref: CloSkillLevelCriteria.skillLevelCriteriaId > SkillLevelCriteria.id
+
+Ref: CourseSection.courseId > Course.id
+
+Ref: CourseGradingCriteria.courseId > Course.id
+
+Ref: Course.curriculumId > Curriculum.id
+
+Ref: CourseTeacher.courseId > Course.id
+
+Ref: CourseTeacher.teacherId > Teacher.id
+
+Ref: CourseTeacher.courseSectionId > CourseSection.id
+
+Ref: StudentCourse.courseId > Course.id
+
+Ref: StudentCourse.studentId > Student.id
+
+Ref: StudentCourse.courseSectionId > CourseSection.id
+
+Ref: Student.affiliatedCurriculumId > Curriculum.id
+
+Ref: Student.userId - User.id
+
+Ref: StudentCourseGrading.studentCourseId > StudentCourse.id
+
+Ref: GradingCloResult.studentCourseGradingId > StudentCourseGrading.id
+
+Ref: GradingCloResult.cloId > Clo.id

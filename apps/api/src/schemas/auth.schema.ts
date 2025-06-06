@@ -1,12 +1,7 @@
 import { Admin, Curriculum, Faculty, Student, Teacher, University } from "@prisma/client";
 import { Static, t } from "elysia";
 
-export const signInRequestSchema = t.Object({
-  email: t.String({ format: "email" }),
-  password: t.String(),
-});
-
-export const getMeSchema = t.Object({
+export const userSchema = {
   id: t.String(),
   nameTitle: t.String(),
   firstName: t.String(),
@@ -14,6 +9,15 @@ export const getMeSchema = t.Object({
   email: t.String({ format: "email" }),
   sex: t.String(),
   role: t.String(),
+};
+
+export const signInRequestSchema = t.Object({
+  email: t.String({ format: "email" }),
+  password: t.String(),
+});
+
+export const getMeSchema = t.Object({
+  ...userSchema,
   student: t.Nullable(
     t.Object({
       id: t.String(),
