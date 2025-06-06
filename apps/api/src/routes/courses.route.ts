@@ -10,7 +10,6 @@ import {
   courseDetailSchema,
   createCourseRequestSchema,
 } from "../schemas/courses.schema";
-import { Course, CoursePlain } from "../../prisma/prismabox/Course";
 
 export const coursesRoutes = new Elysia({
   name: "routes/v1/courses",
@@ -138,6 +137,9 @@ export const coursesRoutes = new Elysia({
               include: {
                 clo: true,
               },
+              orderBy: {
+                index: "asc",
+              },
             },
 
             students: {
@@ -149,6 +151,10 @@ export const coursesRoutes = new Elysia({
                   },
                 },
               },
+            },
+
+            cloWeights: {
+              where: { isDeleted: false },
             },
 
             skills: {
@@ -194,10 +200,18 @@ export const coursesRoutes = new Elysia({
             ],
           },
           include: {
+            studentCourse: {
+              include: {
+                student: true,
+              },
+            },
             gradingCloResults: {
               where: { isDeleted: false },
               include: {
                 clo: true,
+              },
+              orderBy: {
+                index: "asc",
               },
             },
           },
@@ -209,12 +223,11 @@ export const coursesRoutes = new Elysia({
 
         const mappedData: CourseDetailSchema = {
           ...course,
-          studentGradings: studentGradings.map((sg) => ({
-            ...sg,
-            gradingCloResults: sg.gradingCloResults,
-          })),
           gradingCriterias: course.gradingCriterias,
-          clos: course.clos,
+          clos: course.clos.map((clo) => ({
+            ...clo,
+            cloWeights: course.cloWeights.find((cw) => cw.cloId === clo.clo.id) || null,
+          })),
           students: course.students.map((s) => ({
             id: s.student.id,
             userId: s.student.userId,
@@ -226,6 +239,8 @@ export const coursesRoutes = new Elysia({
             birthDate: s.student.birthDate,
             enrolledDate: s.student.enrolledDate,
             user: s.student.user ?? null,
+            grading:
+              studentGradings.find((sg) => sg.studentCourse.studentId === s.student.id) || null,
           })),
           skills: course.skills,
         };
@@ -265,6 +280,9 @@ export const coursesRoutes = new Elysia({
         body;
 
       try {
+        let gradingCloIndex = -1;
+        let cloIndex = -1;
+
         await prisma.$transaction(async (tx) => {
           const course = await tx.course.create({
             data: {
@@ -396,26 +414,67 @@ export const coursesRoutes = new Elysia({
               {
                 cloId: cloId[0],
                 courseId: course.id,
+                index: (cloIndex += 1),
               },
               {
                 cloId: cloId[1],
                 courseId: course.id,
+                index: (cloIndex += 1),
               },
               {
                 cloId: cloId[2],
                 courseId: course.id,
+                index: (cloIndex += 1),
               },
               {
                 cloId: cloId[3],
                 courseId: course.id,
+                index: (cloIndex += 1),
               },
               {
                 cloId: cloId[4],
                 courseId: course.id,
+                index: (cloIndex += 1),
               },
               {
                 cloId: cloId[5],
                 courseId: course.id,
+                index: (cloIndex += 1),
+              },
+            ],
+          });
+
+          await tx.courseCloWeight.createMany({
+            data: [
+              {
+                courseId: course.id,
+                cloId: cloId[0],
+                weight: 0,
+              },
+              {
+                courseId: course.id,
+                cloId: cloId[1],
+                weight: 0,
+              },
+              {
+                courseId: course.id,
+                cloId: cloId[2],
+                weight: 0,
+              },
+              {
+                courseId: course.id,
+                cloId: cloId[3],
+                weight: 0,
+              },
+              {
+                courseId: course.id,
+                cloId: cloId[4],
+                weight: 0,
+              },
+              {
+                courseId: course.id,
+                cloId: cloId[5],
+                weight: 0,
               },
             ],
           });
@@ -621,31 +680,37 @@ export const coursesRoutes = new Elysia({
                   studentCourseGradingId: studentCourseGrading.id,
                   cloId: cloId[0],
                   result: "X",
+                  index: (gradingCloIndex += 1),
                 },
                 {
                   studentCourseGradingId: studentCourseGrading.id,
                   cloId: cloId[1],
                   result: "X",
+                  index: (gradingCloIndex += 1),
                 },
                 {
                   studentCourseGradingId: studentCourseGrading.id,
                   cloId: cloId[2],
                   result: "X",
+                  index: (gradingCloIndex += 1),
                 },
                 {
                   studentCourseGradingId: studentCourseGrading.id,
                   cloId: cloId[3],
                   result: "X",
+                  index: (gradingCloIndex += 1),
                 },
                 {
                   studentCourseGradingId: studentCourseGrading.id,
                   cloId: cloId[4],
                   result: "X",
+                  index: (gradingCloIndex += 1),
                 },
                 {
                   studentCourseGradingId: studentCourseGrading.id,
                   cloId: cloId[5],
                   result: "X",
+                  index: (gradingCloIndex += 1),
                 },
               ],
             });

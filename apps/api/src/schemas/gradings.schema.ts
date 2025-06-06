@@ -17,5 +17,14 @@ export const gradingCloResultBaseSchema = {
   studentCourseGradingId: t.String(),
   cloId: t.String(),
   result: GradingResult,
+  index: t.Number(),
+  ...softDeleteBaseSchema,
+};
+
+export const courseCloWeightBaseSchema = {
+  id: t.String(),
+  courseId: t.String(),
+  cloId: t.String(),
+  weight: t.Number(),
   ...softDeleteBaseSchema,
 };

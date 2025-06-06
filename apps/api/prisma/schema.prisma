@@ -151,8 +151,9 @@ model Clo {
   CloSkillLevelCriteria CloSkillLevelCriteria[]
   courses               CourseClo[]
 
-  isDeleted Boolean   @default(false)
-  deletedAt DateTime?
+  isDeleted       Boolean           @default(false)
+  deletedAt       DateTime?
+  CourseCloWeight CourseCloWeight[]
 
   @@index([isDeleted, deletedAt])
 }
@@ -261,6 +262,20 @@ model CourseGradingCriteria {
   @@index([isDeleted, deletedAt])
 }
 
+model CourseCloWeight {
+  id       String @id @default(cuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
+  cloId    String
+  clo      Clo    @relation(fields: [cloId], references: [id])
+  weight   Float  @default(0)
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
+}
+
 model Course {
   id                     String                  @id @default(cuid())
   skillMappingRefId      String
@@ -278,6 +293,7 @@ model Course {
   clos                   CourseClo[]
   skills                 Skill[]
   cloSkillLevelCriterias CloSkillLevelCriteria[]
+  cloWeights             CourseCloWeight[]
 
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
@@ -291,6 +307,7 @@ model CourseClo {
   course   Course @relation(fields: [courseId], references: [id])
   cloId    String
   clo      Clo    @relation(fields: [cloId], references: [id])
+  index    Int    @default(0)
 
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
@@ -391,6 +408,7 @@ model GradingCloResult {
   cloId                  String
   clo                    Clo                  @relation(fields: [cloId], references: [id])
   result                 GradingResult        @default(X)
+  index                  Int                  @default(0)
 
   isDeleted Boolean   @default(false)
   deletedAt DateTime?

@@ -14,6 +14,20 @@ import { ChevronLeftIcon, EditIcon, InfoIcon, ListIcon, ShareIcon, WeightIcon } 
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { useParams } from "react-router";
+import type { CloType, Grade, GradingResult } from "../../../../../../../api/src/config/prisma";
+
+export type GradingForm = {
+  [studentId: string]: {
+    name: string;
+    clos: {
+      id: string;
+      type: CloType;
+      result: GradingResult;
+    }[];
+    score: number;
+    grade: Grade;
+  };
+};
 
 function CourseGradingPage() {
   const { courseId } = useParams();
@@ -26,46 +40,33 @@ function CourseGradingPage() {
   const course = useMemo(() => courseResponse?.data?.data, [courseResponse]);
 
   const [isAllowToAnnounce, setIsAllowToAnnounce] = useState(false);
-  const [studentGrades, setStudentGrades] = useState({
-    "65070219": {
-      name: "นายสมชาย ใจดี",
-      clos: [
-        {
-          id: "1",
-          type: "K",
-          result: "",
-        },
-        {
-          id: "2",
-          type: "K",
-          result: "",
-        },
-        {
-          id: "3",
-          type: "S",
-          result: "",
-        },
-        {
-          id: "4",
-          type: "S",
-          result: "",
-        },
-        {
-          id: "5",
-          type: "K",
-          result: "",
-        },
-      ],
-      score: 0,
-      grade: "",
-    },
-  });
+  const [studentGrades, setStudentGrades] = useState<GradingForm>({});
+
+  useEffect(() => {
+    if (!course) return;
+
+    const initialGrades = course.students.reduce((acc: GradingForm, student) => {
+      acc[student.universityStudentId] = {
+        name: `${student.user?.firstName} ${student.user?.lastName}`,
+        clos: student.grading!.gradingCloResults.map((gcr) => ({
+          id: gcr.id,
+          type: gcr.clo.type as CloType,
+          result: gcr.result as GradingResult,
+        })),
+        score: student.grading?.score || 0,
+        grade: student.grading?.grade || "X",
+      };
+      return acc;
+    }, {});
+
+    setStudentGrades(initialGrades);
+  }, [course]);
 
   useEffect(() => {
     let isAllow = true;
 
     for (const student of Object.values(studentGrades)) {
-      if (student.clos.some((clo) => clo.result === "")) {
+      if (student.clos.some((clo) => clo.result === "X")) {
         isAllow = false;
         break;
       }
@@ -140,10 +141,14 @@ function CourseGradingPage() {
           <CourseInfoTabContent course={course} />
         </TabsContent>
         <TabsContent value="clos">
-          <CloDetailsTabContent />
+          <CloDetailsTabContent course={course} />
         </TabsContent>
         <TabsContent value="grading">
-          <GradingTabContent setStudentGrades={setStudentGrades} studentGrades={studentGrades} />
+          <GradingTabContent
+            setStudentGrades={setStudentGrades}
+            studentGrades={studentGrades}
+            course={course}
+          />
         </TabsContent>
         <TabsContent value="setting">
           <SettingTabContent />

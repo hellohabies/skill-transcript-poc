@@ -1,6 +1,5 @@
 import { GradingSelect } from "@/components/select/GradingSelect";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -9,24 +8,36 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { InfoIcon } from "lucide-react";
+import type { GradingForm } from "@/pages/(auth)/courses/[courseId]/grading";
+import type { CourseDetailSchema } from "../../../../../../api/src/schemas/courses.schema";
 
 interface GradingTabContentProps {
-  studentGrades: any[];
-  setStudentGrades: React.Dispatch<React.SetStateAction<any>>;
+  studentGrades: GradingForm;
+  setStudentGrades: React.Dispatch<React.SetStateAction<GradingForm>>;
+  course: CourseDetailSchema;
 }
-export function GradingTabContent({ studentGrades, setStudentGrades }: GradingTabContentProps) {
+export function GradingTabContent({
+  studentGrades,
+  setStudentGrades,
+  course,
+}: GradingTabContentProps) {
   const handleGradeChange = (studentId: string, cloId: string, value: string) => {
-    setStudentGrades((prev) => ({
-      ...prev,
-      [studentId]: {
-        ...prev[studentId as keyof typeof prev],
-        clos: prev[studentId as keyof typeof prev].clos.map((clo) =>
-          clo.id === cloId ? { ...clo, result: value } : clo
+    setStudentGrades((prev) => {
+      const updatedStudent = {
+        ...prev[studentId],
+        clos: prev[studentId].clos.map((clo) =>
+          clo.id === cloId ? { ...clo, result: value as typeof clo.result } : clo
         ),
-      },
-    }));
+      };
+
+      return {
+        ...prev,
+        [studentId]: updatedStudent,
+      };
+    });
   };
+
+  const cloCount = course.clos.length;
 
   return (
     <Card>
@@ -36,15 +47,13 @@ export function GradingTabContent({ studentGrades, setStudentGrades }: GradingTa
             <TableRow>
               <TableHead className="w-[100px]">รหัสนักศึกษา</TableHead>
               <TableHead className="w-[150px]">ชื่อ</TableHead>
-              <TableHead className="w-[100px]">
-                <div className="flex items-center gap-2">
-                  CLO 1 <InfoIcon size={14} />
-                </div>
-              </TableHead>
-              <TableHead className="w-[100px]">CLO 2</TableHead>
-              <TableHead className="w-[100px]">CLO 3</TableHead>
-              <TableHead className="w-[100px]">CLO 4</TableHead>
-              <TableHead className="w-[100px]">CLO 5</TableHead>
+
+              {new Array(cloCount).fill(0).map((_, index) => (
+                <TableHead className="w-[100px]">
+                  <div className="flex items-center gap-2">CLO {index + 1}</div>
+                </TableHead>
+              ))}
+
               <TableHead className="w-[50px]">เกรด</TableHead>
             </TableRow>
           </TableHeader>

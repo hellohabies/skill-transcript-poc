@@ -4,16 +4,16 @@ import { __transformDate__ } from "./__transformDate__";
 
 import { __nullable__ } from "./__nullable__";
 
-export const CourseCloPlain = t.Object({
+export const CourseCloWeightPlain = t.Object({
   id: t.String(),
   courseId: t.String(),
   cloId: t.String(),
-  index: t.Integer(),
+  weight: t.Number(),
   isDeleted: t.Boolean(),
   deletedAt: __nullable__(t.Date()),
 });
 
-export const CourseCloRelations = t.Object({
+export const CourseCloWeightRelations = t.Object({
   course: t.Object({
     id: t.String(),
     skillMappingRefId: t.String(),
@@ -35,19 +35,19 @@ export const CourseCloRelations = t.Object({
   }),
 });
 
-export const CourseCloPlainInputCreate = t.Object({
-  index: t.Optional(t.Integer()),
+export const CourseCloWeightPlainInputCreate = t.Object({
+  weight: t.Optional(t.Number()),
   isDeleted: t.Optional(t.Boolean()),
   deletedAt: t.Optional(__nullable__(t.Date())),
 });
 
-export const CourseCloPlainInputUpdate = t.Object({
-  index: t.Optional(t.Integer()),
+export const CourseCloWeightPlainInputUpdate = t.Object({
+  weight: t.Optional(t.Number()),
   isDeleted: t.Optional(t.Boolean()),
   deletedAt: t.Optional(__nullable__(t.Date())),
 });
 
-export const CourseCloRelationsInputCreate = t.Object({
+export const CourseCloWeightRelationsInputCreate = t.Object({
   course: t.Object({
     connect: t.Object({
       id: t.String(),
@@ -60,7 +60,7 @@ export const CourseCloRelationsInputCreate = t.Object({
   }),
 });
 
-export const CourseCloRelationsInputUpdate = t.Partial(
+export const CourseCloWeightRelationsInputUpdate = t.Partial(
   t.Object({
     course: t.Object({
       connect: t.Object({
@@ -75,7 +75,7 @@ export const CourseCloRelationsInputUpdate = t.Partial(
   }),
 );
 
-export const CourseCloWhere = t.Partial(
+export const CourseCloWeightWhere = t.Partial(
   t.Recursive(
     (Self) =>
       t.Object(
@@ -86,17 +86,17 @@ export const CourseCloWhere = t.Partial(
           id: t.String(),
           courseId: t.String(),
           cloId: t.String(),
-          index: t.Integer(),
+          weight: t.Number(),
           isDeleted: t.Boolean(),
           deletedAt: t.Date(),
         },
         { additionalProperties: true },
       ),
-    { $id: "CourseClo" },
+    { $id: "CourseCloWeight" },
   ),
 );
 
-export const CourseCloWhereUnique = t.Recursive(
+export const CourseCloWeightWhereUnique = t.Recursive(
   (Self) =>
     t.Intersect(
       [
@@ -118,7 +118,7 @@ export const CourseCloWhereUnique = t.Recursive(
             id: t.String(),
             courseId: t.String(),
             cloId: t.String(),
-            index: t.Integer(),
+            weight: t.Number(),
             isDeleted: t.Boolean(),
             deletedAt: t.Date(),
           }),
@@ -126,28 +126,28 @@ export const CourseCloWhereUnique = t.Recursive(
       ],
       { additionalProperties: true },
     ),
-  { $id: "CourseClo" },
+  { $id: "CourseCloWeight" },
 );
 
-export const CourseCloSelect = t.Partial(
+export const CourseCloWeightSelect = t.Partial(
   t.Object({
     id: t.Boolean(),
     courseId: t.Boolean(),
     course: t.Boolean(),
     cloId: t.Boolean(),
     clo: t.Boolean(),
-    index: t.Boolean(),
+    weight: t.Boolean(),
     isDeleted: t.Boolean(),
     deletedAt: t.Boolean(),
     _count: t.Boolean(),
   }),
 );
 
-export const CourseCloInclude = t.Partial(
+export const CourseCloWeightInclude = t.Partial(
   t.Object({ course: t.Boolean(), clo: t.Boolean(), _count: t.Boolean() }),
 );
 
-export const CourseCloOrderBy = t.Partial(
+export const CourseCloWeightOrderBy = t.Partial(
   t.Object({
     id: t.Union([t.Literal("asc"), t.Literal("desc")], {
       additionalProperties: true,
@@ -158,7 +158,7 @@ export const CourseCloOrderBy = t.Partial(
     cloId: t.Union([t.Literal("asc"), t.Literal("desc")], {
       additionalProperties: true,
     }),
-    index: t.Union([t.Literal("asc"), t.Literal("desc")], {
+    weight: t.Union([t.Literal("asc"), t.Literal("desc")], {
       additionalProperties: true,
     }),
     isDeleted: t.Union([t.Literal("asc"), t.Literal("desc")], {
@@ -170,14 +170,17 @@ export const CourseCloOrderBy = t.Partial(
   }),
 );
 
-export const CourseClo = t.Composite([CourseCloPlain, CourseCloRelations]);
-
-export const CourseCloInputCreate = t.Composite([
-  CourseCloPlainInputCreate,
-  CourseCloRelationsInputCreate,
+export const CourseCloWeight = t.Composite([
+  CourseCloWeightPlain,
+  CourseCloWeightRelations,
 ]);
 
-export const CourseCloInputUpdate = t.Composite([
-  CourseCloPlainInputUpdate,
-  CourseCloRelationsInputUpdate,
+export const CourseCloWeightInputCreate = t.Composite([
+  CourseCloWeightPlainInputCreate,
+  CourseCloWeightRelationsInputCreate,
+]);
+
+export const CourseCloWeightInputUpdate = t.Composite([
+  CourseCloWeightPlainInputUpdate,
+  CourseCloWeightRelationsInputUpdate,
 ]);

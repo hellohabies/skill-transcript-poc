@@ -85,6 +85,7 @@ export const CourseRelations = t.Object({
       id: t.String(),
       courseId: t.String(),
       cloId: t.String(),
+      index: t.Integer(),
       isDeleted: t.Boolean(),
       deletedAt: __nullable__(t.Date()),
     }),
@@ -117,6 +118,17 @@ export const CourseRelations = t.Object({
       courseId: t.String(),
       cloId: t.String(),
       skillLevelCriteriaId: t.String(),
+      isDeleted: t.Boolean(),
+      deletedAt: __nullable__(t.Date()),
+    }),
+    { additionalProperties: true },
+  ),
+  cloWeights: t.Array(
+    t.Object({
+      id: t.String(),
+      courseId: t.String(),
+      cloId: t.String(),
+      weight: t.Number(),
       isDeleted: t.Boolean(),
       deletedAt: __nullable__(t.Date()),
     }),
@@ -211,6 +223,16 @@ export const CourseRelationsInputCreate = t.Object({
     }),
   ),
   cloSkillLevelCriterias: t.Optional(
+    t.Object({
+      connect: t.Array(
+        t.Object({
+          id: t.String(),
+        }),
+        { additionalProperties: true },
+      ),
+    }),
+  ),
+  cloWeights: t.Optional(
     t.Object({
       connect: t.Array(
         t.Object({
@@ -341,6 +363,22 @@ export const CourseRelationsInputUpdate = t.Partial(
         ),
       }),
     ),
+    cloWeights: t.Partial(
+      t.Object({
+        connect: t.Array(
+          t.Object({
+            id: t.String(),
+          }),
+          { additionalProperties: true },
+        ),
+        disconnect: t.Array(
+          t.Object({
+            id: t.String(),
+          }),
+          { additionalProperties: true },
+        ),
+      }),
+    ),
   }),
 );
 
@@ -424,6 +462,7 @@ export const CourseSelect = t.Partial(
     clos: t.Boolean(),
     skills: t.Boolean(),
     cloSkillLevelCriterias: t.Boolean(),
+    cloWeights: t.Boolean(),
     isDeleted: t.Boolean(),
     deletedAt: t.Boolean(),
     _count: t.Boolean(),
@@ -440,6 +479,7 @@ export const CourseInclude = t.Partial(
     clos: t.Boolean(),
     skills: t.Boolean(),
     cloSkillLevelCriterias: t.Boolean(),
+    cloWeights: t.Boolean(),
     _count: t.Boolean(),
   }),
 );

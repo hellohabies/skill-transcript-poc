@@ -26,6 +26,7 @@ export const CloRelations = t.Object({
         t.Literal("EXCELLENT"),
         t.Literal("X"),
       ]),
+      index: t.Integer(),
       isDeleted: t.Boolean(),
       deletedAt: __nullable__(t.Date()),
     }),
@@ -47,6 +48,18 @@ export const CloRelations = t.Object({
       id: t.String(),
       courseId: t.String(),
       cloId: t.String(),
+      index: t.Integer(),
+      isDeleted: t.Boolean(),
+      deletedAt: __nullable__(t.Date()),
+    }),
+    { additionalProperties: true },
+  ),
+  CourseCloWeight: t.Array(
+    t.Object({
+      id: t.String(),
+      courseId: t.String(),
+      cloId: t.String(),
+      weight: t.Number(),
       isDeleted: t.Boolean(),
       deletedAt: __nullable__(t.Date()),
     }),
@@ -99,6 +112,16 @@ export const CloRelationsInputCreate = t.Object({
       ),
     }),
   ),
+  CourseCloWeight: t.Optional(
+    t.Object({
+      connect: t.Array(
+        t.Object({
+          id: t.String(),
+        }),
+        { additionalProperties: true },
+      ),
+    }),
+  ),
 });
 
 export const CloRelationsInputUpdate = t.Partial(
@@ -136,6 +159,22 @@ export const CloRelationsInputUpdate = t.Partial(
       }),
     ),
     courses: t.Partial(
+      t.Object({
+        connect: t.Array(
+          t.Object({
+            id: t.String(),
+          }),
+          { additionalProperties: true },
+        ),
+        disconnect: t.Array(
+          t.Object({
+            id: t.String(),
+          }),
+          { additionalProperties: true },
+        ),
+      }),
+    ),
+    CourseCloWeight: t.Partial(
       t.Object({
         connect: t.Array(
           t.Object({
@@ -216,6 +255,7 @@ export const CloSelect = t.Partial(
     courses: t.Boolean(),
     isDeleted: t.Boolean(),
     deletedAt: t.Boolean(),
+    CourseCloWeight: t.Boolean(),
     _count: t.Boolean(),
   }),
 );
@@ -226,6 +266,7 @@ export const CloInclude = t.Partial(
     GradingCloResult: t.Boolean(),
     CloSkillLevelCriteria: t.Boolean(),
     courses: t.Boolean(),
+    CourseCloWeight: t.Boolean(),
     _count: t.Boolean(),
   }),
 );

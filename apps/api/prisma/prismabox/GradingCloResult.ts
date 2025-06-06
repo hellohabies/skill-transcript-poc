@@ -16,6 +16,7 @@ export const GradingCloResultPlain = t.Object({
     t.Literal("EXCELLENT"),
     t.Literal("X"),
   ]),
+  index: t.Integer(),
   isDeleted: t.Boolean(),
   deletedAt: __nullable__(t.Date()),
 });
@@ -60,6 +61,7 @@ export const GradingCloResultPlainInputCreate = t.Object({
       t.Literal("X"),
     ]),
   ),
+  index: t.Optional(t.Integer()),
   isDeleted: t.Optional(t.Boolean()),
   deletedAt: t.Optional(__nullable__(t.Date())),
 });
@@ -75,6 +77,7 @@ export const GradingCloResultPlainInputUpdate = t.Object({
       t.Literal("X"),
     ]),
   ),
+  index: t.Optional(t.Integer()),
   isDeleted: t.Optional(t.Boolean()),
   deletedAt: t.Optional(__nullable__(t.Date())),
 });
@@ -126,6 +129,7 @@ export const GradingCloResultWhere = t.Partial(
             t.Literal("EXCELLENT"),
             t.Literal("X"),
           ]),
+          index: t.Integer(),
           isDeleted: t.Boolean(),
           deletedAt: t.Date(),
         },
@@ -165,6 +169,7 @@ export const GradingCloResultWhereUnique = t.Recursive(
               t.Literal("EXCELLENT"),
               t.Literal("X"),
             ]),
+            index: t.Integer(),
             isDeleted: t.Boolean(),
             deletedAt: t.Date(),
           }),
@@ -183,6 +188,7 @@ export const GradingCloResultSelect = t.Partial(
     cloId: t.Boolean(),
     clo: t.Boolean(),
     result: t.Boolean(),
+    index: t.Boolean(),
     isDeleted: t.Boolean(),
     deletedAt: t.Boolean(),
     _count: t.Boolean(),
@@ -207,6 +213,9 @@ export const GradingCloResultOrderBy = t.Partial(
       additionalProperties: true,
     }),
     cloId: t.Union([t.Literal("asc"), t.Literal("desc")], {
+      additionalProperties: true,
+    }),
+    index: t.Union([t.Literal("asc"), t.Literal("desc")], {
       additionalProperties: true,
     }),
     isDeleted: t.Union([t.Literal("asc"), t.Literal("desc")], {

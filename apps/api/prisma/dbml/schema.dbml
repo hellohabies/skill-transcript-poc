@@ -80,6 +80,7 @@ Table Clo {
   courses CourseClo [not null]
   isDeleted Boolean [not null, default: false]
   deletedAt DateTime
+  CourseCloWeight CourseCloWeight [not null]
 }
 
 Table Skill {
@@ -166,6 +167,17 @@ Table CourseGradingCriteria {
   deletedAt DateTime
 }
 
+Table CourseCloWeight {
+  id String [pk]
+  courseId String [not null]
+  course Course [not null]
+  cloId String [not null]
+  clo Clo [not null]
+  weight Float [not null, default: 0]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
 Table Course {
   id String [pk]
   skillMappingRefId String [not null]
@@ -183,6 +195,7 @@ Table Course {
   clos CourseClo [not null]
   skills Skill [not null]
   cloSkillLevelCriterias CloSkillLevelCriteria [not null]
+  cloWeights CourseCloWeight [not null]
   isDeleted Boolean [not null, default: false]
   deletedAt DateTime
 }
@@ -193,6 +206,7 @@ Table CourseClo {
   course Course [not null]
   cloId String [not null]
   clo Clo [not null]
+  index Int [not null, default: 0]
   isDeleted Boolean [not null, default: false]
   deletedAt DateTime
 }
@@ -260,6 +274,7 @@ Table GradingCloResult {
   cloId String [not null]
   clo Clo [not null]
   result GradingResult [not null, default: 'X']
+  index Int [not null, default: 0]
   isDeleted Boolean [not null, default: false]
   deletedAt DateTime
 }
@@ -337,6 +352,10 @@ Ref: CloSkillLevelCriteria.skillLevelCriteriaId > SkillLevelCriteria.id
 Ref: CourseSection.courseId > Course.id
 
 Ref: CourseGradingCriteria.courseId > Course.id
+
+Ref: CourseCloWeight.courseId > Course.id
+
+Ref: CourseCloWeight.cloId > Clo.id
 
 Ref: Course.curriculumId > Curriculum.id
 

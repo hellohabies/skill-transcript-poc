@@ -18,6 +18,7 @@ export * from "./SkillLevelCriteria";
 export * from "./CloSkillLevelCriteria";
 export * from "./CourseSection";
 export * from "./CourseGradingCriteria";
+export * from "./CourseCloWeight";
 export * from "./Course";
 export * from "./CourseClo";
 export * from "./CourseTeacher";

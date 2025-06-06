@@ -46,6 +46,7 @@ export const StudentCourseGradingRelations = t.Object({
         t.Literal("EXCELLENT"),
         t.Literal("X"),
       ]),
+      index: t.Integer(),
       isDeleted: t.Boolean(),
       deletedAt: __nullable__(t.Date()),
     }),

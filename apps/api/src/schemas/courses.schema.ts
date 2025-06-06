@@ -6,7 +6,11 @@ import { softDeleteBaseSchema } from "./base.schema";
 import { skillBaseSchema } from "./skills.schema";
 import { CloType } from "../../prisma/prismabox/CloType";
 import { cloBaseSchema } from "./clos.schema";
-import { gradingCloResultBaseSchema, studentCourseGradingBaseSchema } from "./gradings.schema";
+import {
+  courseCloWeightBaseSchema,
+  gradingCloResultBaseSchema,
+  studentCourseGradingBaseSchema,
+} from "./gradings.schema";
 
 export const createCourseRequestSchema = t.Object({
   courseCode: t.String(),
@@ -28,6 +32,17 @@ export const studentWithUserSchema = t.Object({
   deletedAt: t.Nullable(t.Date()),
   birthDate: t.Date(),
   enrolledDate: t.Date(),
+  grading: t.Nullable(
+    t.Object({
+      ...studentCourseGradingBaseSchema,
+      gradingCloResults: t.Array(
+        t.Object({
+          ...gradingCloResultBaseSchema,
+          clo: t.Object({ ...cloBaseSchema }),
+        })
+      ),
+    })
+  ),
   user: t.Nullable(
     t.Object({
       id: t.String(),
@@ -42,6 +57,7 @@ export const courseCloBaseSchema = {
   id: t.String(),
   courseId: t.String(),
   cloId: t.String(),
+  index: t.Number(),
   ...softDeleteBaseSchema,
 };
 
@@ -54,19 +70,14 @@ export const courseDetailSchema = t.Object({
   descriptionTh: t.String(),
   descriptionEn: t.String(),
   curriculumId: t.String(),
-  studentGradings: t.Array(
+  gradingCriterias: t.Array(CourseGradingCriteriaPlain),
+  clos: t.Array(
     t.Object({
-      ...studentCourseGradingBaseSchema,
-      gradingCloResults: t.Array(
-        t.Object({
-          ...gradingCloResultBaseSchema,
-          clo: t.Object({ ...cloBaseSchema }),
-        })
-      ),
+      ...courseCloBaseSchema,
+      clo: t.Object({ ...cloBaseSchema }),
+      cloWeights: t.Nullable(t.Object({ ...courseCloWeightBaseSchema })),
     })
   ),
-  gradingCriterias: t.Array(CourseGradingCriteriaPlain),
-  clos: t.Array(t.Object({ ...courseCloBaseSchema, clo: t.Object({ ...cloBaseSchema }) })),
   students: t.Array(studentWithUserSchema),
   skills: t.Array(t.Object({ ...skillBaseSchema })),
   ...softDeleteBaseSchema,
