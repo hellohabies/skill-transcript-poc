@@ -3,21 +3,16 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
 
 interface GradingSelectProps {
-  gradingType: "normal" | "skill";
   value: string;
   onValueChange: (value: string) => void;
 }
-export function GradingSelect({ gradingType, value, onValueChange }: GradingSelectProps) {
-  const NORMAL_OPTIONS = ["FAIL", "PASS", "GOOD", "VERY_GOOD", "EXCELLENT"];
-  const SKILL_OPTIONS = ["FAIL", "PASS"];
-
-  const options = gradingType === "normal" ? NORMAL_OPTIONS : SKILL_OPTIONS;
+export function GradingSelect({ value, onValueChange }: GradingSelectProps) {
+  const options = ["FAIL", "PASS", "GOOD", "VERY_GOOD", "EXCELLENT"];
 
   return (
     <Select value={value} onValueChange={onValueChange}>

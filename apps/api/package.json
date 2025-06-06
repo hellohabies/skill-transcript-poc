@@ -6,6 +6,8 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc src/index.ts --outDir dist",
     "start": "NODE_ENV=production node dist/index.js",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
     "db:seed:admin": "ts-node src/seed/admin.ts",
     "db:seed:npru": "ts-node src/seed/npru.ts",
     "db:migrate:reset": "prisma migrate reset --force --skip-seed",

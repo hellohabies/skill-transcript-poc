@@ -1,30 +1,13 @@
 import { PageTitleSubtitle } from "@/components/PageTitleSubtitle";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuthContext } from "@/contexts/AuthContext";
 import { withAuth } from "@/hocs/withAuth";
 import { CloDetailsTabContent } from "@/modules/courses/grading/tabs/CloDetailsTabContent";
 import { CourseInfoTabContent } from "@/modules/courses/grading/tabs/CourseInfoTabContent";
 import { GradingTabContent } from "@/modules/courses/grading/tabs/GradingTabContent";
 import { SettingTabContent } from "@/modules/courses/grading/tabs/SettingTabContent";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  EditIcon,
-  InfoIcon,
-  ListIcon,
-  ShareIcon,
-  WeightIcon,
-} from "lucide-react";
+import { ChevronLeftIcon, EditIcon, InfoIcon, ListIcon, ShareIcon, WeightIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { useParams } from "react-router";
@@ -63,6 +46,8 @@ function CourseGradingPage() {
           result: "",
         },
       ],
+      score: 0,
+      grade: "",
     },
   });
 

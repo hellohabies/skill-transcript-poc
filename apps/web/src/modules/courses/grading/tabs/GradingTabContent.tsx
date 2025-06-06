@@ -56,14 +56,15 @@ export function GradingTabContent({ studentGrades, setStudentGrades }: GradingTa
                 {student.clos.map((clo) => (
                   <TableCell key={clo.id}>
                     <GradingSelect
-                      gradingType={clo.type !== "S" ? "normal" : "skill"}
                       value={clo.result}
                       onValueChange={(value) => handleGradeChange(studentId, clo.id, value)}
                     />
                   </TableCell>
                 ))}
                 <TableCell>
-                  <p className="text-center">A</p>
+                  <p>
+                    ({student.score}) {student.grade || "-"}
+                  </p>
                 </TableCell>
               </TableRow>
             ))}

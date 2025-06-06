@@ -37,6 +37,11 @@ model User {
   student   Student?
   teacher   Teacher?
   admin     Admin?
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
 }
 
 model University {
@@ -44,6 +49,11 @@ model University {
   emblemImageSrc String
   name           String
   faculties      Faculty[]
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
 }
 
 model Faculty {
@@ -52,6 +62,11 @@ model Faculty {
   universityId String
   university   University   @relation(fields: [universityId], references: [id])
   curriculums  Curriculum[]
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
 }
 
 model Curriculum {
@@ -63,6 +78,11 @@ model Curriculum {
   students    Student[]
   teachers    Teacher[]
   courses     Course[]
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
 }
 
 model Teacher {
@@ -74,12 +94,22 @@ model Teacher {
   userId                 String          @unique
   user                   User            @relation(fields: [userId], references: [id])
   courses                CourseTeacher[]
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
 }
 
 model Admin {
   id     String @id @default(cuid())
   userId String @unique
   user   User   @relation(fields: [userId], references: [id])
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
 }
 
 enum CloType {
@@ -95,43 +125,95 @@ enum SkillType {
   OTHER
 }
 
-model CourseClo {
-  id       String  @id @default(cuid())
-  type     CloType
-  clo      String
-  courseId String
-  course   Course  @relation(fields: [courseId], references: [id])
-}
+model Clo {
+  id                    String                  @id @default(cuid())
+  type                  CloType
+  clo                   String
+  courseId              String
+  course                Course                  @relation(fields: [courseId], references: [id])
+  GradingCloResult      GradingCloResult[]
+  CloSkillLevelCriteria CloSkillLevelCriteria[]
 
-model SkillEvaluation {
-  id                 String     @id @default(cuid())
-  evaluation         String
-  evaluationCriteria String
-  skillLevelId       String
-  skillLevel         SkillLevel @relation(fields: [skillLevelId], references: [id])
-}
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
 
-model SkillLevel {
-  id                String            @id @default(cuid())
-  skillMappingRefId String
-  level             Int
-  titleTh           String
-  titleEn           String
-  skillEvaluations  SkillEvaluation[]
+  @@index([isDeleted, deletedAt])
 }
 
 model Skill {
-  id                String    @id @default(cuid())
+  id                String       @id @default(cuid())
   skillMappingRefId String
-  nameEn            String
   nameTh            String
-  descriptionEn     String
+  nameEn            String
   descriptionTh     String
+  descriptionEn     String
   type              SkillType
-  isMainSkill       Boolean   @default(false)
+  isMainSkill       Boolean      @default(false)
   courseId          String
-  course            Course    @relation(fields: [courseId], references: [id])
-  deletedAt         DateTime?
+  course            Course       @relation(fields: [courseId], references: [id])
+  skillLevels       SkillLevel[]
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
+}
+
+model SkillLevel {
+  id            String               @id @default(cuid())
+  skillId       String
+  skill         Skill                @relation(fields: [skillId], references: [id])
+  level         Int                  @default(1)
+  descriptionTh String
+  descriptionEn String
+  methods       SkillLevelMethod[]
+  criterias     SkillLevelCriteria[]
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
+}
+
+model SkillLevelMethod {
+  id           String     @id @default(cuid())
+  skillLevelId String
+  skillLevel   SkillLevel @relation(fields: [skillLevelId], references: [id])
+  methodNameTh String
+  methodNameEn String
+  isDeleted    Boolean    @default(false)
+  deletedAt    DateTime?
+
+  @@index([isDeleted, deletedAt])
+}
+
+model SkillLevelCriteria {
+  id                     String                  @id @default(cuid())
+  skillLevelId           String
+  skillLevel             SkillLevel              @relation(fields: [skillLevelId], references: [id])
+  criteriaNameTh         String
+  criteriaNameEn         String
+  cloSkillLevelCriterias CloSkillLevelCriteria[]
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
+}
+
+model CloSkillLevelCriteria {
+  id                   String             @id @default(cuid())
+  courseId             String
+  course               Course             @relation(fields: [courseId], references: [id])
+  cloId                String
+  clo                  Clo                @relation(fields: [cloId], references: [id])
+  skillLevelCriteriaId String
+  skillLevelCriteria   SkillLevelCriteria @relation(fields: [skillLevelCriteriaId], references: [id])
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
 }
 
 model CourseSection {
@@ -140,24 +222,50 @@ model CourseSection {
   course   Course          @relation(fields: [courseId], references: [id])
   section  String
   teachers CourseTeacher[]
-  students CourseStudent[]
+  students StudentCourse[]
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
+}
+
+model CourseGradingCriteria {
+  id       String @id @default(cuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
+  grade    Grade
+  minScore Float
+  maxScore Float
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
 }
 
 model Course {
-  id                String          @id @default(cuid())
-  skillMappingRefId String
-  courseCode        String
-  nameEn            String
-  nameTh            String
-  descriptionEn     String
-  descriptionTh     String
-  curriculumId      String
-  curriculum        Curriculum      @relation(fields: [curriculumId], references: [id])
-  clos              CourseClo[]
-  teachers          CourseTeacher[]
-  sections          CourseSection[]
-  students          CourseStudent[]
-  skills            Skill[]
+  id                     String                  @id @default(cuid())
+  skillMappingRefId      String
+  courseCode             String
+  nameEn                 String
+  nameTh                 String
+  descriptionEn          String
+  descriptionTh          String
+  curriculumId           String
+  curriculum             Curriculum              @relation(fields: [curriculumId], references: [id])
+  clos                   Clo[]
+  teachers               CourseTeacher[]
+  sections               CourseSection[]
+  students               StudentCourse[]
+  gradingCriterias       CourseGradingCriteria[]
+  skills                 Skill[]
+  cloSkillLevelCriterias CloSkillLevelCriteria[]
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
 }
 
 model CourseTeacher {
@@ -168,16 +276,27 @@ model CourseTeacher {
   teacher         Teacher        @relation(fields: [teacherId], references: [id])
   courseSectionId String
   courseSection   CourseSection? @relation(fields: [courseSectionId], references: [id])
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
 }
 
-model CourseStudent {
-  id              String         @id @default(cuid())
+model StudentCourse {
+  id              String                 @id @default(cuid())
   courseId        String
-  course          Course         @relation(fields: [courseId], references: [id])
+  course          Course                 @relation(fields: [courseId], references: [id])
   studentId       String
-  student         Student        @relation(fields: [studentId], references: [id])
+  student         Student                @relation(fields: [studentId], references: [id])
   courseSectionId String?
-  courseSection   CourseSection? @relation(fields: [courseSectionId], references: [id])
+  courseSection   CourseSection?         @relation(fields: [courseSectionId], references: [id])
+  gradings        StudentCourseGrading[]
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
 }
 
 model Student {
@@ -190,20 +309,61 @@ model Student {
   affiliatedCurriculum   Curriculum      @relation(fields: [affiliatedCurriculumId], references: [id])
   userId                 String          @unique
   user                   User            @relation(fields: [userId], references: [id])
-  courses                CourseStudent[]
+  courses                StudentCourse[]
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
 
   @@unique([universityStudentId, affiliatedCurriculumId])
+  @@index([isDeleted, deletedAt])
 }
 
-// model GradeReportSkill {
+enum Grade {
+  A
+  B_PLUS
+  B
+  C_PLUS
+  C
+  D_PLUS
+  D
+  F
+  X
+}
 
-// }
+enum GradingResult {
+  FAIL
+  PASS
+  GOOD
+  VERY_GOOD
+  EXCELLENT
+  X
+}
 
-// model GradeReportClo {
+model StudentCourseGrading {
+  id                String             @id @default(cuid())
+  studentCourseId   String
+  studentCourse     StudentCourse      @relation(fields: [studentCourseId], references: [id])
+  gradingDate       DateTime
+  grade             Grade              @default(X)
+  score             Float              @default(0)
+  gradingCloResults GradingCloResult[]
 
-// }
-
-model GradeReport {
-  id        String    @id @default(cuid())
+  isDeleted Boolean   @default(false)
   deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
+}
+
+model GradingCloResult {
+  id                     String               @id @default(cuid())
+  studentCourseGradingId String
+  studentCourseGrading   StudentCourseGrading @relation(fields: [studentCourseGradingId], references: [id])
+  cloId                  String
+  clo                    Clo                  @relation(fields: [cloId], references: [id])
+  result                 GradingResult        @default(X)
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
 }
