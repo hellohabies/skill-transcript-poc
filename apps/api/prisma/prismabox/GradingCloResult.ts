@@ -24,7 +24,7 @@ export const GradingCloResultRelations = t.Object({
   studentCourseGrading: t.Object({
     id: t.String(),
     studentCourseId: t.String(),
-    gradingDate: t.Date(),
+    gradingDate: __nullable__(t.Date()),
     grade: t.Union([
       t.Literal("A"),
       t.Literal("B_PLUS"),

@@ -50,7 +50,7 @@ export const StudentCourseRelations = t.Object({
     t.Object({
       id: t.String(),
       studentCourseId: t.String(),
-      gradingDate: t.Date(),
+      gradingDate: __nullable__(t.Date()),
       grade: t.Union([
         t.Literal("A"),
         t.Literal("B_PLUS"),

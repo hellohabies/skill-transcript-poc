@@ -5,7 +5,11 @@ import { prisma } from "../config/prisma";
 import { ERROR_RESPONSES } from "../error";
 import { baseResponseSchema } from "./response";
 import { CurriculumResponseSchema, curriculumResponseSchema } from "../schemas/curriculum.schema";
-import { courseDetailSchema, createCourseRequestSchema } from "../schemas/courses.schema";
+import {
+  CourseDetailSchema,
+  courseDetailSchema,
+  createCourseRequestSchema,
+} from "../schemas/courses.schema";
 import { Course, CoursePlain } from "../../prisma/prismabox/Course";
 
 export const coursesRoutes = new Elysia({
@@ -178,27 +182,58 @@ export const coursesRoutes = new Elysia({
           return error("Not Found", ERROR_RESPONSES.notFound);
         }
 
+        const studentGradings = await prisma.studentCourseGrading.findMany({
+          where: {
+            AND: [
+              {
+                studentCourse: {
+                  courseId: course.id,
+                },
+                isDeleted: false,
+              },
+            ],
+          },
+          include: {
+            gradingCloResults: {
+              where: { isDeleted: false },
+              include: {
+                clo: true,
+              },
+            },
+          },
+        });
+
+        if (!studentGradings) {
+          return error("Not Found", ERROR_RESPONSES.notFound);
+        }
+
+        const mappedData: CourseDetailSchema = {
+          ...course,
+          studentGradings: studentGradings.map((sg) => ({
+            ...sg,
+            gradingCloResults: sg.gradingCloResults,
+          })),
+          gradingCriterias: course.gradingCriterias,
+          clos: course.clos,
+          students: course.students.map((s) => ({
+            id: s.student.id,
+            userId: s.student.userId,
+            universityStudentId: s.student.universityStudentId,
+            identificationNumber: s.student.identificationNumber,
+            affiliatedCurriculumId: s.student.affiliatedCurriculumId,
+            isDeleted: s.student.isDeleted,
+            deletedAt: s.student.deletedAt,
+            birthDate: s.student.birthDate,
+            enrolledDate: s.student.enrolledDate,
+            user: s.student.user ?? null,
+          })),
+          skills: course.skills,
+        };
+
         return {
           statusCode: 200,
           isSuccess: true,
-          data: {
-            ...course,
-            gradingCriterias: course.gradingCriterias,
-            clos: course.clos,
-            students: course.students.map((s) => ({
-              id: s.student.id,
-              userId: s.student.userId,
-              universityStudentId: s.student.universityStudentId,
-              identificationNumber: s.student.identificationNumber,
-              affiliatedCurriculumId: s.student.affiliatedCurriculumId,
-              isDeleted: s.student.isDeleted,
-              deletedAt: s.student.deletedAt,
-              birthDate: s.student.birthDate,
-              enrolledDate: s.student.enrolledDate,
-              user: s.student.user ?? null,
-            })),
-            skills: course.skills,
-          },
+          data: mappedData,
           error: null,
         };
       } catch (err) {
@@ -215,7 +250,10 @@ export const coursesRoutes = new Elysia({
     },
     {
       response: {
-        200: courseDetailSchema,
+        200: t.Object({
+          ...baseResponseSchema,
+          data: courseDetailSchema,
+        }),
       },
     }
   )
@@ -557,13 +595,61 @@ export const coursesRoutes = new Elysia({
             },
           });
 
-          await tx.studentCourse.createMany({
-            data: curriculumStudents.map((student) => ({
-              courseId: course.id,
-              studentId: student.id,
-              courseSectionId: courseSection.id,
-            })),
-          });
+          // STUDENT GRADING
+          for (const student of curriculumStudents) {
+            const studentCourse = await tx.studentCourse.create({
+              data: {
+                courseId: course.id,
+                studentId: student.id,
+                courseSectionId: courseSection.id,
+              },
+            });
+
+            const studentCourseGrading = await tx.studentCourseGrading.create({
+              data: {
+                studentCourse: {
+                  connect: {
+                    id: studentCourse.id,
+                  },
+                },
+              },
+            });
+
+            await tx.gradingCloResult.createMany({
+              data: [
+                {
+                  studentCourseGradingId: studentCourseGrading.id,
+                  cloId: cloId[0],
+                  result: "X",
+                },
+                {
+                  studentCourseGradingId: studentCourseGrading.id,
+                  cloId: cloId[1],
+                  result: "X",
+                },
+                {
+                  studentCourseGradingId: studentCourseGrading.id,
+                  cloId: cloId[2],
+                  result: "X",
+                },
+                {
+                  studentCourseGradingId: studentCourseGrading.id,
+                  cloId: cloId[3],
+                  result: "X",
+                },
+                {
+                  studentCourseGradingId: studentCourseGrading.id,
+                  cloId: cloId[4],
+                  result: "X",
+                },
+                {
+                  studentCourseGradingId: studentCourseGrading.id,
+                  cloId: cloId[5],
+                  result: "X",
+                },
+              ],
+            });
+          }
         });
       } catch (err) {
         return error("Internal Server Error", {

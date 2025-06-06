@@ -1,19 +1,29 @@
+import Loader from "@/components/Loader";
 import { PageTitleSubtitle } from "@/components/PageTitleSubtitle";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { api } from "@/config/api";
 import { withAuth } from "@/hocs/withAuth";
 import { CloDetailsTabContent } from "@/modules/courses/grading/tabs/CloDetailsTabContent";
 import { CourseInfoTabContent } from "@/modules/courses/grading/tabs/CourseInfoTabContent";
 import { GradingTabContent } from "@/modules/courses/grading/tabs/GradingTabContent";
 import { SettingTabContent } from "@/modules/courses/grading/tabs/SettingTabContent";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronLeftIcon, EditIcon, InfoIcon, ListIcon, ShareIcon, WeightIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { useParams } from "react-router";
 
 function CourseGradingPage() {
   const { courseId } = useParams();
+
+  const { data: courseResponse, isLoading: isLoadingCourse } = useQuery({
+    queryKey: ["courses", courseId],
+    queryFn: () => api.courses({ id: courseId as string }).get(),
+  });
+
+  const course = useMemo(() => courseResponse?.data?.data, [courseResponse]);
 
   const [isAllowToAnnounce, setIsAllowToAnnounce] = useState(false);
   const [studentGrades, setStudentGrades] = useState({
@@ -64,6 +74,18 @@ function CourseGradingPage() {
     setIsAllowToAnnounce(isAllow);
   }, [studentGrades]);
 
+  if (isLoadingCourse) {
+    return <Loader />;
+  }
+
+  if (!course) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-red-500">ไม่พบข้อมูลรายวิชานี้</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <Link to={`/home`}>
@@ -87,8 +109,10 @@ function CourseGradingPage() {
 
       <Card className="mt-7 shadow-xs">
         <CardHeader>
-          <CardTitle>1171102 - พัฒนาการและการเรียนรู้สาหรับเด็กปฐมวัย</CardTitle>
-          <CardDescription>Early Childhood Development and Learning</CardDescription>
+          <CardTitle>
+            {course?.courseCode} - {course?.nameTh}
+          </CardTitle>
+          <CardDescription>{course?.nameEn}</CardDescription>
         </CardHeader>
       </Card>
 
@@ -113,7 +137,7 @@ function CourseGradingPage() {
 
         <div className="my-0"></div>
         <TabsContent value="info">
-          <CourseInfoTabContent />
+          <CourseInfoTabContent course={course} />
         </TabsContent>
         <TabsContent value="clos">
           <CloDetailsTabContent />

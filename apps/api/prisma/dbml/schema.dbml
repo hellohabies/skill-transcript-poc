@@ -245,7 +245,7 @@ Table StudentCourseGrading {
   id String [pk]
   studentCourseId String [not null]
   studentCourse StudentCourse [not null]
-  gradingDate DateTime [not null]
+  gradingDate DateTime
   grade Grade [not null, default: 'X']
   score Float [not null, default: 0]
   gradingCloResults GradingCloResult [not null]

@@ -373,7 +373,7 @@ model StudentCourseGrading {
   id                String             @id @default(cuid())
   studentCourseId   String
   studentCourse     StudentCourse      @relation(fields: [studentCourseId], references: [id])
-  gradingDate       DateTime
+  gradingDate       DateTime?
   grade             Grade              @default(X)
   score             Float              @default(0)
   gradingCloResults GradingCloResult[]

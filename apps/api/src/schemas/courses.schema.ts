@@ -6,6 +6,7 @@ import { softDeleteBaseSchema } from "./base.schema";
 import { skillBaseSchema } from "./skills.schema";
 import { CloType } from "../../prisma/prismabox/CloType";
 import { cloBaseSchema } from "./clos.schema";
+import { gradingCloResultBaseSchema, studentCourseGradingBaseSchema } from "./gradings.schema";
 
 export const createCourseRequestSchema = t.Object({
   courseCode: t.String(),
@@ -45,23 +46,30 @@ export const courseCloBaseSchema = {
 };
 
 export const courseDetailSchema = t.Object({
-  ...baseResponseSchema,
-  data: t.Object({
-    id: t.String(),
-    skillMappingRefId: t.String(),
-    courseCode: t.String(),
-    nameTh: t.String(),
-    nameEn: t.String(),
-    descriptionTh: t.String(),
-    descriptionEn: t.String(),
-    curriculumId: t.String(),
-
-    gradingCriterias: t.Array(CourseGradingCriteriaPlain),
-    clos: t.Array(t.Object({ ...courseCloBaseSchema, clo: t.Object({ ...cloBaseSchema }) })),
-    students: t.Array(studentWithUserSchema),
-    skills: t.Array(t.Object({ ...skillBaseSchema })),
-    ...softDeleteBaseSchema,
-  }),
+  id: t.String(),
+  skillMappingRefId: t.String(),
+  courseCode: t.String(),
+  nameTh: t.String(),
+  nameEn: t.String(),
+  descriptionTh: t.String(),
+  descriptionEn: t.String(),
+  curriculumId: t.String(),
+  studentGradings: t.Array(
+    t.Object({
+      ...studentCourseGradingBaseSchema,
+      gradingCloResults: t.Array(
+        t.Object({
+          ...gradingCloResultBaseSchema,
+          clo: t.Object({ ...cloBaseSchema }),
+        })
+      ),
+    })
+  ),
+  gradingCriterias: t.Array(CourseGradingCriteriaPlain),
+  clos: t.Array(t.Object({ ...courseCloBaseSchema, clo: t.Object({ ...cloBaseSchema }) })),
+  students: t.Array(studentWithUserSchema),
+  skills: t.Array(t.Object({ ...skillBaseSchema })),
+  ...softDeleteBaseSchema,
 });
 
 export type CreateCourseRequestSchema = Static<typeof createCourseRequestSchema>;

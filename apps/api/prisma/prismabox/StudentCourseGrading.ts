@@ -7,7 +7,7 @@ import { __nullable__ } from "./__nullable__";
 export const StudentCourseGradingPlain = t.Object({
   id: t.String(),
   studentCourseId: t.String(),
-  gradingDate: t.Date(),
+  gradingDate: __nullable__(t.Date()),
   grade: t.Union([
     t.Literal("A"),
     t.Literal("B_PLUS"),
@@ -54,7 +54,7 @@ export const StudentCourseGradingRelations = t.Object({
 });
 
 export const StudentCourseGradingPlainInputCreate = t.Object({
-  gradingDate: t.Date(),
+  gradingDate: t.Optional(__nullable__(t.Date())),
   grade: t.Optional(
     t.Union([
       t.Literal("A"),
@@ -74,7 +74,7 @@ export const StudentCourseGradingPlainInputCreate = t.Object({
 });
 
 export const StudentCourseGradingPlainInputUpdate = t.Object({
-  gradingDate: t.Optional(t.Date()),
+  gradingDate: t.Optional(__nullable__(t.Date())),
   grade: t.Optional(
     t.Union([
       t.Literal("A"),
