@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -19,23 +19,40 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { useFaculties } from "@/hooks/query/faculties/useFaculties";
+import Loader from "@/components/Loader";
 
 function AuthCoursesPage() {
+  const { facultyId, curriculumId } = useParams();
+
+  const { selectedCurriculum, selectedFaculty, isLoadingFaculties } = useFaculties({
+    facultiesId: facultyId || "",
+    curriculumsId: curriculumId || "",
+  });
+
+  if (isLoadingFaculties) {
+    return <Loader />;
+  }
+
   return (
     <>
       <div className="mb-7">
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/faculties">คณะ</BreadcrumbLink>
+              <Link to="/faculties">
+                <BreadcrumbLink>คณะ</BreadcrumbLink>
+              </Link>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink href="/faculties/1/curriculums">คณะเทคโนโลยีสารสนเทศ</BreadcrumbLink>
+              <Link to={`/faculties/${selectedFaculty?.id}/curriculums`}>
+                <BreadcrumbLink>{selectedFaculty?.name}</BreadcrumbLink>
+              </Link>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>หลักสูตร X</BreadcrumbPage>
+              <BreadcrumbPage>{selectedCurriculum?.programName}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -43,7 +60,7 @@ function AuthCoursesPage() {
 
       <div className="flex items-center justify-between">
         <PageTitleSubtitle title="รายวิชา" subtitle="รายวิชาทั้งหมดภายในระบบ Skill Transcript" />
-        <Link to={"/auth/courses/assign"}>
+        <Link to={`/faculties/${facultyId}/curriculums/${curriculumId}/assign`}>
           <Button>มอบหมายอาจารย์</Button>
         </Link>
       </div>
@@ -70,12 +87,12 @@ function AuthCoursesPage() {
           </TableRow>
         ))} */}
         </TableBody>
-        <TableFooter>
+        {/* <TableFooter>
           <TableRow>
             <TableCell colSpan={3}>Total</TableCell>
             <TableCell className="text-right">$2,500.00</TableCell>
           </TableRow>
-        </TableFooter>
+        </TableFooter> */}
       </Table>
     </>
   );

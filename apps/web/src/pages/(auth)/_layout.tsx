@@ -1,10 +1,8 @@
 import { AppSidebar } from "@/components/sidebar/AppSidebar";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { withAuth } from "@/hocs/withAuth";
-import { LogOutIcon } from "lucide-react";
 import { Outlet } from "react-router";
 
 const ROLE_TITLE = {
@@ -18,7 +16,7 @@ function getTitleByRole(role: "ADMIN" | "STUDENT" | "TEACHER"): string {
 }
 
 function RootLayout() {
-  const { authUserRole, signOut } = useAuthContext();
+  const { authUserRole } = useAuthContext();
 
   return (
     <SidebarProvider>
@@ -40,10 +38,10 @@ function RootLayout() {
             </div>
           </div>
 
-          <Button variant={"ghost"} onClick={signOut}>
+          {/* <Button variant={"ghost"} onClick={signOut}>
             <LogOutIcon />
             ออกจากระบบ
-          </Button>
+          </Button> */}
         </div>
 
         <div className="bg-[#F9FAFB] p-5 min-h-[calc(100dvh-60px)] overflow-y-auto">
@@ -55,7 +53,6 @@ function RootLayout() {
 }
 
 const ProtectedRootLayout = withAuth(RootLayout, {
-  unauthorizedRedirectPath: "/auth/login",
   allowedRoles: ["ADMIN", "STUDENT", "TEACHER"],
 });
 

@@ -1,7 +1,18 @@
+import { useAuthContext } from "@/contexts/AuthContext";
 import { withAuth } from "@/hocs/withAuth";
+import ProtectedStudentHomePage from "@/modules/home/studentHomePage";
+import ProtectedTeacherHomePage from "@/modules/home/TeacherHomePage";
 
 function AuthHomePage() {
-  return <div>AuthHome</div>;
+  const { authUserRole } = useAuthContext();
+
+  if (authUserRole === "TEACHER") {
+    return <ProtectedTeacherHomePage />;
+  } else if (authUserRole === "STUDENT") {
+    return <ProtectedStudentHomePage />;
+  }
+
+  return <></>;
 }
 
 const ProtectedAuthHomePage = withAuth(AuthHomePage, {

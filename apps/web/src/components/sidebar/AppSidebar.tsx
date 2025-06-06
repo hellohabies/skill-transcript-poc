@@ -1,30 +1,34 @@
-import { Sidebar, SidebarContent, SidebarHeader } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useEffect } from "react";
-import { useLocation } from "react-router";
+import { useCallback, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router";
 import { getSidebarItemsConfigByRole } from "@/config/sidebar";
 import { setDocumentTitle } from "@/lib/utils";
 import SidebarMenuItem from "./SidebarMenuItem";
+import { toast } from "sonner";
+import { getErrorResponseAndShowErrorToast } from "@/lib/toast";
+import { LogOutIcon } from "lucide-react";
 
 export function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const { authUserRole } = useAuthContext();
+  const { authUserRole, signOut } = useAuthContext();
 
   const SIDEBAR_ITEMS_CONFIG = getSidebarItemsConfigByRole(authUserRole || "STUDENT");
 
-  // const handleSignout = useCallback(() => {
-  //   signOut()
-  //     .then(() => {
-  //       navigate("/auth/login");
-  //       toast.success("Signed out successfully", {
-  //         description: "ออกจากระบบเรียบร้อยแล้ว",
-  //       });
-  //     })
-  //     .catch((error) => {
-  //       getErrorResponseAndShowErrorToast(error);
-  //     });
-  // }, [navigate, signOut]);
+  const handleSignout = useCallback(() => {
+    signOut()
+      .then(() => {
+        navigate("/");
+        toast.success("Signed out successfully", {
+          description: "ออกจากระบบเรียบร้อยแล้ว",
+        });
+      })
+      .catch((error) => {
+        getErrorResponseAndShowErrorToast(error);
+      });
+  }, [navigate, signOut]);
 
   useEffect(() => {
     const currentPath = location.pathname;
@@ -78,7 +82,7 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      {/* <SidebarFooter className="px-3.5 pb-4 flex flex-col gap-2">
+      <SidebarFooter className="px-3.5 pb-4 flex flex-col gap-2">
         <SidebarMenuItem
           inActiveIcon={<LogOutIcon size={20} />}
           activeIcon={<LogOutIcon size={20} />}
@@ -86,7 +90,7 @@ export function AppSidebar() {
           isLogout
           onClick={handleSignout}
         />
-      </SidebarFooter> */}
+      </SidebarFooter>
     </Sidebar>
   );
 }
