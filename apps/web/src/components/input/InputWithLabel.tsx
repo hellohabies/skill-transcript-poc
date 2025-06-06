@@ -10,6 +10,7 @@ interface InputWithLabelProps {
   placeholder?: string;
   value: any;
   onValueChange: (value: any) => void;
+  disabled?: boolean;
 }
 
 export default function InputWithLabel({
@@ -20,6 +21,7 @@ export default function InputWithLabel({
   placeholder,
   value,
   onValueChange,
+  disabled = false,
 }: InputWithLabelProps) {
   if (inputType === "textarea") {
     return (
@@ -30,6 +32,7 @@ export default function InputWithLabel({
           placeholder={placeholder}
           value={value}
           onChange={(e) => onValueChange(e.target.value)}
+          disabled={disabled}
         />
       </div>
     );
@@ -44,6 +47,7 @@ export default function InputWithLabel({
         placeholder={placeholder}
         value={value}
         onChange={(e) => onValueChange(e.target.value)}
+        disabled={disabled}
       />
     </div>
   );

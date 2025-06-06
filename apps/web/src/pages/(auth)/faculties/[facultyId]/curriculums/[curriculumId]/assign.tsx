@@ -1,6 +1,6 @@
 import { PageTitleSubtitle } from "@/components/PageTitleSubtitle";
 import { Button } from "@/components/ui/button";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,9 +13,9 @@ import { useFaculties } from "@/hooks/query/faculties/useFaculties";
 import Loader from "@/components/Loader";
 import { Card, CardContent } from "@/components/ui/card";
 import InputWithLabel from "@/components/input/InputWithLabel";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Separator } from "@/components/ui/separator";
-import { Check, ChevronsUpDown, SearchIcon } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2Icon, SearchIcon } from "lucide-react";
 import {
   Command,
   CommandEmpty,
@@ -26,9 +26,23 @@ import {
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { api } from "@/config/api";
+import type { CreateCourseRequestSchema } from "../../../../../../../../api/src/schemas/courses.schema";
+import { toast } from "sonner";
 
 function AuthCurriculumAssign() {
+  const navigate = useNavigate();
   const { facultyId, curriculumId } = useParams();
+
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: (data: CreateCourseRequestSchema) => api.courses.post(data),
+  });
+
+  const { data: curriculumTeachersRes, isLoading: isLoadingTeachers } = useQuery({
+    queryKey: ["teachers"],
+    queryFn: () => api.users.teachers.curriculum({ curriculumId: curriculumId || "" }).get(),
+  });
 
   const [courseId, setCourseId] = useState("");
 
@@ -39,19 +53,65 @@ function AuthCurriculumAssign() {
 
   const [open, setOpen] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState("");
-  const [teachers, setTeachers] = useState<
-    {
-      label: string;
-      value: string;
-    }[]
-  >([]);
+  const [isLoadingCourseData, setIsLoadingCourseData] = useState(false);
 
   const { selectedCurriculum, selectedFaculty, isLoadingFaculties } = useFaculties({
     facultiesId: facultyId || "",
     curriculumsId: curriculumId || "",
   });
 
-  if (isLoadingFaculties) {
+  const teachers = useMemo(() => {
+    const _teachers = curriculumTeachersRes?.data?.data || [];
+    return (
+      _teachers?.map((teacher) => ({
+        label: `${teacher.firstName} ${teacher.lastName} - ${teacher.email}`,
+        value: teacher.teacher?.id || "",
+      })) || []
+    );
+  }, [curriculumTeachersRes]);
+
+  const handleCreateCourse = useCallback(async () => {
+    try {
+      const { error } = await mutateAsync({
+        courseCode: courseId,
+        nameTh: courseNameTh,
+        nameEn: courseNameEn,
+        descriptionTh: courseDescriptionTh,
+        descriptionEn: courseDescriptionEn,
+        teacherId: selectedTeacher,
+        curriculumId: selectedCurriculum?.id || "",
+      });
+
+      if (error) {
+        toast.error("เกิดข้อผิดพลาดในการสร้างรายวิชา", {
+          description: (error.value as { error: { message: string } }).error.message,
+        });
+        return;
+      }
+
+      toast.success("สร้างรายวิชาเรียบร้อยแล้ว", {
+        description: "คุณได้สร้างรายวิชาใหม่เรียบร้อยแล้ว",
+      });
+
+      navigate(`/faculties/${facultyId}/curriculums/${curriculumId}`);
+    } catch (error) {
+      console.error(error);
+    }
+  }, [
+    courseId,
+    courseNameTh,
+    courseNameEn,
+    courseDescriptionTh,
+    courseDescriptionEn,
+    selectedTeacher,
+    selectedCurriculum?.id,
+    mutateAsync,
+    navigate,
+    facultyId,
+    curriculumId,
+  ]);
+
+  if (isLoadingFaculties || isLoadingTeachers) {
     return <Loader />;
   }
 
@@ -92,12 +152,14 @@ function AuthCurriculumAssign() {
         <PageTitleSubtitle title="รายวิชา" subtitle="รายวิชาทั้งหมดภายในระบบ Skill Transcript" />
         <div className="flex items-center gap-4">
           <Link to={`/faculties/${facultyId}/curriculums/${curriculumId}`}>
-            <Button variant={"secondary"}>ยกเลิก</Button>
+            <Button variant={"secondary"} disabled={isPending}>
+              ยกเลิก
+            </Button>
           </Link>
 
-          <Link to={`/faculties/${facultyId}/curriculums/${curriculumId}/assign`}>
-            <Button>ยืนยัน</Button>
-          </Link>
+          <Button onClick={handleCreateCourse} disabled={isPending}>
+            {isPending && <Loader2Icon className="animate-spin" />} ยืนยัน
+          </Button>
         </div>
       </div>
 
@@ -120,10 +182,12 @@ function AuthCurriculumAssign() {
                   id="courseId"
                   value={courseId}
                   onValueChange={setCourseId}
+                  disabled={isPending}
                 />
 
                 <Button className="self-end">
-                  <SearchIcon /> โหลดข้อมูล
+                  {isLoadingCourseData ? <Loader2Icon className="animate-spin" /> : <SearchIcon />}
+                  โหลดข้อมูล
                 </Button>
               </div>
             </div>
@@ -144,6 +208,7 @@ function AuthCurriculumAssign() {
                 id="courseNamTh"
                 value={courseNameTh}
                 onValueChange={setCourseNameTh}
+                disabled={isPending}
               />
 
               <InputWithLabel
@@ -152,6 +217,7 @@ function AuthCurriculumAssign() {
                 id="courseNameEn"
                 value={courseNameEn}
                 onValueChange={setCourseNameEn}
+                disabled={isPending}
               />
 
               <InputWithLabel
@@ -160,6 +226,7 @@ function AuthCurriculumAssign() {
                 id="courseDescriptionTh"
                 value={courseDescriptionTh}
                 onValueChange={setCourseDescriptionTh}
+                disabled={isPending}
               />
 
               <InputWithLabel
@@ -168,6 +235,7 @@ function AuthCurriculumAssign() {
                 id="courseDescriptionEn"
                 value={courseDescriptionEn}
                 onValueChange={setCourseDescriptionEn}
+                disabled={isPending}
               />
             </div>
           </div>
@@ -188,6 +256,7 @@ function AuthCurriculumAssign() {
                     role="combobox"
                     aria-expanded={open}
                     className="justify-between !h-10 max-w-md w-full"
+                    disabled={isPending}
                   >
                     {teachers
                       ? teachers.find((option) => option.value === selectedTeacher)?.label
@@ -195,7 +264,7 @@ function AuthCurriculumAssign() {
                     <ChevronsUpDown className="opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="start" className="min-w-full max-w-md self-start p-0">
+                <PopoverContent align="start" className="w-full  self-start p-0">
                   <Command>
                     <CommandInput placeholder="ค้นหาอาจารย์ผู้สอน" className="h-9" />
                     <CommandList>
@@ -203,6 +272,7 @@ function AuthCurriculumAssign() {
                       <CommandGroup>
                         {teachers.map((option) => (
                           <CommandItem
+                            disabled={isPending}
                             key={option.value}
                             value={option.value}
                             onSelect={(currentValue) => {

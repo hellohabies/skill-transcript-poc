@@ -7,7 +7,11 @@ import { swagger } from "@elysiajs/swagger";
 
 const app = new Elysia({ adapter: node() })
   .use(swagger())
-  .use(cors())
+  .use(
+    cors({
+      origin: "localhost:3000",
+    })
+  )
 
   .get("/", () => "Hello Elysia")
 
