@@ -21,16 +21,28 @@ import {
 } from "@/components/ui/breadcrumb";
 import { useFaculties } from "@/hooks/query/faculties/useFaculties";
 import Loader from "@/components/Loader";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/config/api";
+import { useMemo } from "react";
 
 function AuthCoursesPage() {
   const { facultyId, curriculumId } = useParams();
+
+  const { data: curriculumTeachersRes, isLoading: isLoadingTeachers } = useQuery({
+    queryKey: ["courses", "curriculum", curriculumId],
+    queryFn: () => api.courses.curriculums({ curriculumId: curriculumId || "" }).get(),
+  });
+
+  const teacherCourses = useMemo(() => {
+    return curriculumTeachersRes?.data?.data.courses || [];
+  }, [curriculumTeachersRes]);
 
   const { selectedCurriculum, selectedFaculty, isLoadingFaculties } = useFaculties({
     facultiesId: facultyId || "",
     curriculumsId: curriculumId || "",
   });
 
-  if (isLoadingFaculties) {
+  if (isLoadingFaculties || isLoadingTeachers) {
     return <Loader />;
   }
 
@@ -66,8 +78,7 @@ function AuthCoursesPage() {
       </div>
 
       <Table className="my-7">
-        <TableCaption>รายวิชาและอาจารย์ผู้สอน</TableCaption>
-        <TableHeader>
+        <TableHeader className="bg-gray-100">
           <TableRow>
             <TableHead>คณะ</TableHead>
             <TableHead>หลักสูตร</TableHead>
@@ -78,21 +89,23 @@ function AuthCoursesPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {/* {[].map((invoice) => (
-          <TableRow key={invoice.invoice}>
-            <TableCell className="font-medium">{invoice.invoice}</TableCell>
-            <TableCell>{invoice.paymentStatus}</TableCell>
-            <TableCell>{invoice.paymentMethod}</TableCell>
-            <TableCell className="text-right">{invoice.totalAmount}</TableCell>
-          </TableRow>
-        ))} */}
+          {teacherCourses.map((course) => (
+            <TableRow key={course.id}>
+              <TableCell className="font-medium">{selectedFaculty?.name}</TableCell>
+              <TableCell>{selectedCurriculum?.programName}</TableCell>
+              <TableCell>{course.courseCode}</TableCell>
+              <TableCell className="text-wrap">{course.nameTh}</TableCell>
+              <TableCell className="text-wrap">{course.nameEn}</TableCell>
+              <TableCell>
+                {course.teachers[0].user.nameTitle +
+                  " " +
+                  course.teachers[0].user.firstName +
+                  " " +
+                  course.teachers[0].user.lastName}
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
-        {/* <TableFooter>
-          <TableRow>
-            <TableCell colSpan={3}>Total</TableCell>
-            <TableCell className="text-right">$2,500.00</TableCell>
-          </TableRow>
-        </TableFooter> */}
       </Table>
     </>
   );

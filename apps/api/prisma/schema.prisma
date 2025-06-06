@@ -4,6 +4,20 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+generator prismabox {
+  provider                    = "prismabox"
+  // you can optionally specify the output location. Defaults to ./prismabox
+  output                      = "./prismabox"
+  // if you want, you can customize the imported variable name that is used for the schemes. Defaults to "Type" which is what the standard typebox package offers
+  typeboxImportVariableName   = "t"
+  // you also can specify the dependency from which the above import should happen. This is useful if a package re-exports the typebox package and you would like to use that
+  typeboxImportDependencyName = "elysia"
+  // by default the generated schemes do not allow additional properties. You can allow them by setting this to true
+  additionalProperties        = true
+  // optionally enable the data model generation. See the data model section below for more info
+  inputModel                  = true
+}
+
 generator dbml {
   provider = "prisma-dbml-generator"
 }
@@ -133,10 +147,9 @@ model Clo {
   id                    String                  @id @default(cuid())
   type                  CloType
   name                  String
-  courseId              String
-  course                Course                  @relation(fields: [courseId], references: [id])
   GradingCloResult      GradingCloResult[]
   CloSkillLevelCriteria CloSkillLevelCriteria[]
+  courses               CourseClo[]
 
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
@@ -258,13 +271,26 @@ model Course {
   descriptionTh          String
   curriculumId           String
   curriculum             Curriculum              @relation(fields: [curriculumId], references: [id])
-  clos                   Clo[]
   teachers               CourseTeacher[]
   sections               CourseSection[]
   students               StudentCourse[]
   gradingCriterias       CourseGradingCriteria[]
+  clos                   CourseClo[]
   skills                 Skill[]
   cloSkillLevelCriterias CloSkillLevelCriteria[]
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
+}
+
+model CourseClo {
+  id       String @id @default(cuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
+  cloId    String
+  clo      Clo    @relation(fields: [cloId], references: [id])
 
   isDeleted Boolean   @default(false)
   deletedAt DateTime?

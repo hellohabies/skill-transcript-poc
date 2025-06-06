@@ -40,7 +40,7 @@ function AuthCurriculumAssign() {
   });
 
   const { data: curriculumTeachersRes, isLoading: isLoadingTeachers } = useQuery({
-    queryKey: ["teachers"],
+    queryKey: ["users", "teachers", "curriculum", curriculumId],
     queryFn: () => api.users.teachers.curriculum({ curriculumId: curriculumId || "" }).get(),
   });
 
@@ -61,14 +61,16 @@ function AuthCurriculumAssign() {
   });
 
   const teachers = useMemo(() => {
-    const _teachers = curriculumTeachersRes?.data?.data || [];
+    if (isLoadingTeachers) return [];
+    if (!curriculumTeachersRes?.data?.data) return [];
+
     return (
-      _teachers?.map((teacher) => ({
+      curriculumTeachersRes?.data?.data.map((teacher) => ({
         label: `${teacher.firstName} ${teacher.lastName} - ${teacher.email}`,
         value: teacher.teacher?.id || "",
       })) || []
     );
-  }, [curriculumTeachersRes]);
+  }, [curriculumTeachersRes, isLoadingTeachers]);
 
   const handleCreateCourse = useCallback(async () => {
     try {

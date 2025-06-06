@@ -179,9 +179,9 @@ async function main() {
           },
           user: {
             create: {
-              nameTitle: faker.person.prefix(),
-              firstName: faker.person.firstName(),
-              lastName: faker.person.lastName(),
+              nameTitle: "K.",
+              firstName: "Student",
+              lastName: studentCount + 1 + "",
               email: `student${(studentCount += 1)}@npru.ac.th`,
               password: PASSWORD,
               sex: "MALE",
@@ -202,9 +202,9 @@ async function main() {
           },
           user: {
             create: {
-              nameTitle: faker.person.prefix(),
-              firstName: faker.person.firstName(),
-              lastName: faker.person.lastName(),
+              nameTitle: "K.",
+              firstName: "Teacher",
+              lastName: teacherCount + 1 + "",
               email: `teacher${(teacherCount += 1)}@npru.ac.th`,
               password: PASSWORD,
               sex: "MALE",

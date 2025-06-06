@@ -5,7 +5,8 @@ import { prisma } from "../config/prisma";
 import { ERROR_RESPONSES } from "../error";
 import { baseResponseSchema } from "./response";
 import { CurriculumResponseSchema, curriculumResponseSchema } from "../schemas/curriculum.schema";
-import { createCourseRequestSchema } from "../schemas/courses.schema";
+import { courseDetailSchema, createCourseRequestSchema } from "../schemas/courses.schema";
+import { Course, CoursePlain } from "../../prisma/prismabox/Course";
 
 export const coursesRoutes = new Elysia({
   name: "routes/v1/courses",
@@ -113,7 +114,111 @@ export const coursesRoutes = new Elysia({
     }
   )
 
-  .get("/:id", async () => {})
+  .get(
+    "/:id",
+    async ({ params, error }) => {
+      const { id } = params;
+
+      try {
+        const course = await prisma.course.findUnique({
+          where: {
+            id,
+          },
+          include: {
+            gradingCriterias: {
+              where: { isDeleted: false },
+            },
+
+            clos: {
+              where: { isDeleted: false },
+              include: {
+                clo: true,
+              },
+            },
+
+            students: {
+              where: { isDeleted: false },
+              include: {
+                student: {
+                  include: {
+                    user: true,
+                  },
+                },
+              },
+            },
+
+            skills: {
+              where: { isDeleted: false },
+              include: {
+                skillLevels: {
+                  where: { isDeleted: false },
+                  include: {
+                    methods: {
+                      where: { isDeleted: false },
+                    },
+                    criterias: {
+                      where: { isDeleted: false },
+                      include: {
+                        cloSkillLevelCriterias: {
+                          where: { isDeleted: false },
+                          include: {
+                            clo: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        if (!course) {
+          return error("Not Found", ERROR_RESPONSES.notFound);
+        }
+
+        return {
+          statusCode: 200,
+          isSuccess: true,
+          data: {
+            ...course,
+            gradingCriterias: course.gradingCriterias,
+            clos: course.clos,
+            students: course.students.map((s) => ({
+              id: s.student.id,
+              userId: s.student.userId,
+              universityStudentId: s.student.universityStudentId,
+              identificationNumber: s.student.identificationNumber,
+              affiliatedCurriculumId: s.student.affiliatedCurriculumId,
+              isDeleted: s.student.isDeleted,
+              deletedAt: s.student.deletedAt,
+              birthDate: s.student.birthDate,
+              enrolledDate: s.student.enrolledDate,
+              user: s.student.user ?? null,
+            })),
+            skills: course.skills,
+          },
+          error: null,
+        };
+      } catch (err) {
+        console.error("Error fetching course:", err);
+        return error("Internal Server Error", {
+          statusCode: 500,
+          isSuccess: false,
+          error: {
+            message: err instanceof Error ? err.message : "Internal Server Error",
+          },
+          data: null,
+        });
+      }
+    },
+    {
+      response: {
+        200: courseDetailSchema,
+      },
+    }
+  )
 
   .post(
     "/",
@@ -203,42 +308,75 @@ export const coursesRoutes = new Elysia({
             ],
           });
 
-          const cloId = [crypto.randomUUID(), crypto.randomUUID(), crypto.randomUUID()];
+          const cloId = [
+            crypto.randomUUID(),
+            crypto.randomUUID(),
+            crypto.randomUUID(),
+            crypto.randomUUID(),
+            crypto.randomUUID(),
+            crypto.randomUUID(),
+          ];
 
           // MOCK
           await tx.clo.createMany({
             data: [
               {
+                id: cloId[5],
                 type: "A",
                 name: "MOCK_CLO_A",
-                courseId: course.id,
               },
               {
+                id: cloId[4],
                 type: "A",
                 name: "MOCK_CLO_B",
-                courseId: course.id,
               },
               {
+                id: cloId[3],
                 type: "K",
                 name: "MOCK_CLO_C",
-                courseId: course.id,
               },
               {
                 id: cloId[0],
                 type: "S",
                 name: "นักศึกษาสามารถเขียนโปรแกรมภาษา Python",
-                courseId: course.id,
               },
               {
                 id: cloId[1],
                 type: "S",
                 name: "นักศึกษาสามารถเขียนโปรแกรมภาษา C",
-                courseId: course.id,
               },
               {
                 id: cloId[2],
                 type: "S",
                 name: "นักศึกษาสามารถเขียนโปรแกรมภาษา Java",
+              },
+            ],
+          });
+
+          await tx.courseClo.createMany({
+            data: [
+              {
+                cloId: cloId[0],
+                courseId: course.id,
+              },
+              {
+                cloId: cloId[1],
+                courseId: course.id,
+              },
+              {
+                cloId: cloId[2],
+                courseId: course.id,
+              },
+              {
+                cloId: cloId[3],
+                courseId: course.id,
+              },
+              {
+                cloId: cloId[4],
+                courseId: course.id,
+              },
+              {
+                cloId: cloId[5],
                 courseId: course.id,
               },
             ],
@@ -383,7 +521,7 @@ export const coursesRoutes = new Elysia({
               {
                 courseId: course.id,
                 cloId: cloId[2],
-                skillLevelCriteriaId: skillLevelCriteria1.id,
+                skillLevelCriteriaId: skillLevelCriteria3.id,
               },
             ],
           });

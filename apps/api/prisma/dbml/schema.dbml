@@ -75,10 +75,9 @@ Table Clo {
   id String [pk]
   type CloType [not null]
   name String [not null]
-  courseId String [not null]
-  course Course [not null]
   GradingCloResult GradingCloResult [not null]
   CloSkillLevelCriteria CloSkillLevelCriteria [not null]
+  courses CourseClo [not null]
   isDeleted Boolean [not null, default: false]
   deletedAt DateTime
 }
@@ -177,13 +176,23 @@ Table Course {
   descriptionTh String [not null]
   curriculumId String [not null]
   curriculum Curriculum [not null]
-  clos Clo [not null]
   teachers CourseTeacher [not null]
   sections CourseSection [not null]
   students StudentCourse [not null]
   gradingCriterias CourseGradingCriteria [not null]
+  clos CourseClo [not null]
   skills Skill [not null]
   cloSkillLevelCriterias CloSkillLevelCriteria [not null]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table CourseClo {
+  id String [pk]
+  courseId String [not null]
+  course Course [not null]
+  cloId String [not null]
+  clo Clo [not null]
   isDeleted Boolean [not null, default: false]
   deletedAt DateTime
 }
@@ -311,8 +320,6 @@ Ref: Teacher.userId - User.id
 
 Ref: Admin.userId - User.id
 
-Ref: Clo.courseId > Course.id
-
 Ref: Skill.courseId > Course.id
 
 Ref: SkillLevel.skillId > Skill.id
@@ -332,6 +339,10 @@ Ref: CourseSection.courseId > Course.id
 Ref: CourseGradingCriteria.courseId > Course.id
 
 Ref: Course.curriculumId > Curriculum.id
+
+Ref: CourseClo.courseId > Course.id
+
+Ref: CourseClo.cloId > Clo.id
 
 Ref: CourseTeacher.courseId > Course.id
 
