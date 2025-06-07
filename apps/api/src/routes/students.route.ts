@@ -33,7 +33,20 @@ export const studentsRoutes = new Elysia({
             isDeleted: false,
           },
           include: {
-            course: true,
+            course: {
+              include: {
+                teachers: {
+                  include: {
+                    teacher: {
+                      include: {
+                        user: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+
             gradings: {
               where: {
                 isDeleted: false,
@@ -63,7 +76,12 @@ export const studentsRoutes = new Elysia({
           courseSectionId: sc.courseSectionId ?? "",
           isDeleted: sc.isDeleted,
           deletedAt: sc.deletedAt,
-          course: sc.course,
+          course: {
+            ...sc.course,
+            teacher: {
+              ...sc.course.teachers[0].teacher,
+            },
+          },
           gradings: {
             id: sc.gradings[0].id,
             studentCourseId: sc.gradings[0].studentCourseId,
