@@ -3,6 +3,7 @@ import { authRoutes } from "./auth.route";
 import { facultiesRoutes } from "./faculties.route";
 import { coursesRoutes } from "./courses.route";
 import { usersRoute } from "./users.route";
+import { gradingsRoutes } from "./gradings.route";
 
 const routes = new Elysia({
   prefix: "/api/v1",
@@ -10,6 +11,7 @@ const routes = new Elysia({
   .use(authRoutes)
   .use(facultiesRoutes)
   .use(coursesRoutes)
-  .use(usersRoute);
+  .use(usersRoute)
+  .use(gradingsRoutes);
 
 export { routes as v1AppRoutes };
