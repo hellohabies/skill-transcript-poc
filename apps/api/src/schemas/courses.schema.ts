@@ -61,6 +61,18 @@ export const courseCloBaseSchema = {
   ...softDeleteBaseSchema,
 };
 
+export const courseBaseSchema = {
+  id: t.String(),
+  skillMappingRefId: t.String(),
+  courseCode: t.String(),
+  nameTh: t.String(),
+  nameEn: t.String(),
+  descriptionTh: t.String(),
+  descriptionEn: t.String(),
+  curriculumId: t.String(),
+  ...softDeleteBaseSchema,
+};
+
 export const courseDetailSchema = t.Object({
   id: t.String(),
   skillMappingRefId: t.String(),
