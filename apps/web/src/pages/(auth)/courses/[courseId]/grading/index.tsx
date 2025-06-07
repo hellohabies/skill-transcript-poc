@@ -15,9 +15,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { useParams } from "react-router";
 import type { CloType, Grade, GradingResult } from "../../../../../../../api/src/config/prisma";
+import { calculateStudentGradeAndScores } from "@/lib/grade";
 
 export type GradingForm = {
   [studentId: string]: {
+    universityStudentId: string;
     name: string;
     clos: {
       id: string;
@@ -46,15 +48,26 @@ function CourseGradingPage() {
     if (!course) return;
 
     const initialGrades = course.students.reduce((acc: GradingForm, student) => {
-      acc[student.universityStudentId] = {
-        name: `${student.user?.firstName} ${student.user?.lastName}`,
-        clos: student.grading!.gradingCloResults.map((gcr) => ({
-          id: gcr.id,
-          type: gcr.clo.type as CloType,
-          result: gcr.result as GradingResult,
-        })),
+      const clos = student.grading!.gradingCloResults.map((gcr) => ({
+        id: gcr.clo.id,
+        type: gcr.clo.type as CloType,
+        result: gcr.result as GradingResult,
+      }));
+
+      const [newScore, newGrade] = calculateStudentGradeAndScores(course, {
+        clos,
+        universityStudentId: student.universityStudentId || "",
         score: student.grading?.score || 0,
         grade: student.grading?.grade || "X",
+        name: `${student.user?.firstName} ${student.user?.lastName}`,
+      });
+
+      acc[student.id] = {
+        universityStudentId: student.universityStudentId || "",
+        name: `${student.user?.firstName} ${student.user?.lastName}`,
+        clos,
+        score: newScore,
+        grade: newGrade,
       };
       return acc;
     }, {});

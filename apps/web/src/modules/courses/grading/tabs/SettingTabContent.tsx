@@ -182,6 +182,8 @@ export function SettingTabContent({ course }: SettingTabContentProps) {
       }
 
       toast.success("บันทึกการตั้งค่าเรียบร้อยแล้ว");
+
+      window.location.reload();
     } catch (err) {
       console.error("Error saving settings:", err);
     }
