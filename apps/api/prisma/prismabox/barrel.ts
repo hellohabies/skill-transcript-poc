@@ -21,6 +21,7 @@ export * from "./CourseGradingCriteria";
 export * from "./CourseCloWeight";
 export * from "./Course";
 export * from "./CourseClo";
+export * from "./CourseSkill";
 export * from "./CourseTeacher";
 export * from "./StudentCourse";
 export * from "./Student";

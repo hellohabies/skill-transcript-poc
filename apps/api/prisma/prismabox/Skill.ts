@@ -18,24 +18,11 @@ export const SkillPlain = t.Object({
     t.Literal("OTHER"),
   ]),
   isMainSkill: t.Boolean(),
-  courseId: t.String(),
   isDeleted: t.Boolean(),
   deletedAt: __nullable__(t.Date()),
 });
 
 export const SkillRelations = t.Object({
-  course: t.Object({
-    id: t.String(),
-    skillMappingRefId: t.String(),
-    courseCode: t.String(),
-    nameEn: t.String(),
-    nameTh: t.String(),
-    descriptionEn: t.String(),
-    descriptionTh: t.String(),
-    curriculumId: t.String(),
-    isDeleted: t.Boolean(),
-    deletedAt: __nullable__(t.Date()),
-  }),
   skillLevels: t.Array(
     t.Object({
       id: t.String(),
@@ -43,6 +30,17 @@ export const SkillRelations = t.Object({
       level: t.Integer(),
       descriptionTh: t.String(),
       descriptionEn: t.String(),
+      isDeleted: t.Boolean(),
+      deletedAt: __nullable__(t.Date()),
+    }),
+    { additionalProperties: true },
+  ),
+  courseSkills: t.Array(
+    t.Object({
+      id: t.String(),
+      courseId: t.String(),
+      skillId: t.String(),
+      index: t.Integer(),
       isDeleted: t.Boolean(),
       deletedAt: __nullable__(t.Date()),
     }),
@@ -85,12 +83,17 @@ export const SkillPlainInputUpdate = t.Object({
 });
 
 export const SkillRelationsInputCreate = t.Object({
-  course: t.Object({
-    connect: t.Object({
-      id: t.String(),
-    }),
-  }),
   skillLevels: t.Optional(
+    t.Object({
+      connect: t.Array(
+        t.Object({
+          id: t.String(),
+        }),
+        { additionalProperties: true },
+      ),
+    }),
+  ),
+  courseSkills: t.Optional(
     t.Object({
       connect: t.Array(
         t.Object({
@@ -104,12 +107,23 @@ export const SkillRelationsInputCreate = t.Object({
 
 export const SkillRelationsInputUpdate = t.Partial(
   t.Object({
-    course: t.Object({
-      connect: t.Object({
-        id: t.String(),
-      }),
-    }),
     skillLevels: t.Partial(
+      t.Object({
+        connect: t.Array(
+          t.Object({
+            id: t.String(),
+          }),
+          { additionalProperties: true },
+        ),
+        disconnect: t.Array(
+          t.Object({
+            id: t.String(),
+          }),
+          { additionalProperties: true },
+        ),
+      }),
+    ),
+    courseSkills: t.Partial(
       t.Object({
         connect: t.Array(
           t.Object({
@@ -149,7 +163,6 @@ export const SkillWhere = t.Partial(
             t.Literal("OTHER"),
           ]),
           isMainSkill: t.Boolean(),
-          courseId: t.String(),
           isDeleted: t.Boolean(),
           deletedAt: t.Date(),
         },
@@ -191,7 +204,6 @@ export const SkillWhereUnique = t.Recursive(
               t.Literal("OTHER"),
             ]),
             isMainSkill: t.Boolean(),
-            courseId: t.String(),
             isDeleted: t.Boolean(),
             deletedAt: t.Date(),
           }),
@@ -212,9 +224,8 @@ export const SkillSelect = t.Partial(
     descriptionEn: t.Boolean(),
     type: t.Boolean(),
     isMainSkill: t.Boolean(),
-    courseId: t.Boolean(),
-    course: t.Boolean(),
     skillLevels: t.Boolean(),
+    courseSkills: t.Boolean(),
     isDeleted: t.Boolean(),
     deletedAt: t.Boolean(),
     _count: t.Boolean(),
@@ -224,8 +235,8 @@ export const SkillSelect = t.Partial(
 export const SkillInclude = t.Partial(
   t.Object({
     type: t.Boolean(),
-    course: t.Boolean(),
     skillLevels: t.Boolean(),
+    courseSkills: t.Boolean(),
     _count: t.Boolean(),
   }),
 );
@@ -251,9 +262,6 @@ export const SkillOrderBy = t.Partial(
       additionalProperties: true,
     }),
     isMainSkill: t.Union([t.Literal("asc"), t.Literal("desc")], {
-      additionalProperties: true,
-    }),
-    courseId: t.Union([t.Literal("asc"), t.Literal("desc")], {
       additionalProperties: true,
     }),
     isDeleted: t.Union([t.Literal("asc"), t.Literal("desc")], {

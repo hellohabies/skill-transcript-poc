@@ -49,7 +49,6 @@ export const skillBaseSchema = {
   descriptionEn: t.String(),
   type: SkillType,
   isMainSkill: t.Boolean(),
-  courseId: t.String(),
   skillLevels: t.Array(t.Object({ ...skillLevelBaseSchema })),
   ...softDeleteBaseSchema,
 };

@@ -73,6 +73,10 @@ export const studentGradingResponseSchema = t.Object({
   grade: GradingResult,
 });
 
+export const gradeAnnouncementRequestSchema = t.Object({
+  courseId: t.String(),
+});
+
 export type CloWeightSettingsRequestSchema = Static<typeof cloWeightSettingsRequestSchema>;
 export type CloWeightSettingsResponseSchema = Static<typeof cloWeightSettingsResponseSchema>;
 
@@ -81,3 +85,5 @@ export type GradingCriteriaResponseSchema = Static<typeof gradingCriteriaRespons
 
 export type StudentGradingRequestSchema = Static<typeof studentGradingRequestSchema>;
 export type StudentGradingResponseSchema = Static<typeof studentGradingResponseSchema>;
+
+export type GradeAnnouncementRequestSchema = Static<typeof gradeAnnouncementRequestSchema>;

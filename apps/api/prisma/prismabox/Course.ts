@@ -91,27 +91,6 @@ export const CourseRelations = t.Object({
     }),
     { additionalProperties: true },
   ),
-  skills: t.Array(
-    t.Object({
-      id: t.String(),
-      skillMappingRefId: t.String(),
-      nameTh: t.String(),
-      nameEn: t.String(),
-      descriptionTh: t.String(),
-      descriptionEn: t.String(),
-      type: t.Union([
-        t.Literal("SPECIFIC"),
-        t.Literal("GENERAL"),
-        t.Literal("MAIN"),
-        t.Literal("OTHER"),
-      ]),
-      isMainSkill: t.Boolean(),
-      courseId: t.String(),
-      isDeleted: t.Boolean(),
-      deletedAt: __nullable__(t.Date()),
-    }),
-    { additionalProperties: true },
-  ),
   cloSkillLevelCriterias: t.Array(
     t.Object({
       id: t.String(),
@@ -129,6 +108,17 @@ export const CourseRelations = t.Object({
       courseId: t.String(),
       cloId: t.String(),
       weight: t.Number(),
+      isDeleted: t.Boolean(),
+      deletedAt: __nullable__(t.Date()),
+    }),
+    { additionalProperties: true },
+  ),
+  courseSkills: t.Array(
+    t.Object({
+      id: t.String(),
+      courseId: t.String(),
+      skillId: t.String(),
+      index: t.Integer(),
       isDeleted: t.Boolean(),
       deletedAt: __nullable__(t.Date()),
     }),
@@ -212,16 +202,6 @@ export const CourseRelationsInputCreate = t.Object({
       ),
     }),
   ),
-  skills: t.Optional(
-    t.Object({
-      connect: t.Array(
-        t.Object({
-          id: t.String(),
-        }),
-        { additionalProperties: true },
-      ),
-    }),
-  ),
   cloSkillLevelCriterias: t.Optional(
     t.Object({
       connect: t.Array(
@@ -233,6 +213,16 @@ export const CourseRelationsInputCreate = t.Object({
     }),
   ),
   cloWeights: t.Optional(
+    t.Object({
+      connect: t.Array(
+        t.Object({
+          id: t.String(),
+        }),
+        { additionalProperties: true },
+      ),
+    }),
+  ),
+  courseSkills: t.Optional(
     t.Object({
       connect: t.Array(
         t.Object({
@@ -331,22 +321,6 @@ export const CourseRelationsInputUpdate = t.Partial(
         ),
       }),
     ),
-    skills: t.Partial(
-      t.Object({
-        connect: t.Array(
-          t.Object({
-            id: t.String(),
-          }),
-          { additionalProperties: true },
-        ),
-        disconnect: t.Array(
-          t.Object({
-            id: t.String(),
-          }),
-          { additionalProperties: true },
-        ),
-      }),
-    ),
     cloSkillLevelCriterias: t.Partial(
       t.Object({
         connect: t.Array(
@@ -364,6 +338,22 @@ export const CourseRelationsInputUpdate = t.Partial(
       }),
     ),
     cloWeights: t.Partial(
+      t.Object({
+        connect: t.Array(
+          t.Object({
+            id: t.String(),
+          }),
+          { additionalProperties: true },
+        ),
+        disconnect: t.Array(
+          t.Object({
+            id: t.String(),
+          }),
+          { additionalProperties: true },
+        ),
+      }),
+    ),
+    courseSkills: t.Partial(
       t.Object({
         connect: t.Array(
           t.Object({
@@ -460,9 +450,9 @@ export const CourseSelect = t.Partial(
     students: t.Boolean(),
     gradingCriterias: t.Boolean(),
     clos: t.Boolean(),
-    skills: t.Boolean(),
     cloSkillLevelCriterias: t.Boolean(),
     cloWeights: t.Boolean(),
+    courseSkills: t.Boolean(),
     isDeleted: t.Boolean(),
     deletedAt: t.Boolean(),
     _count: t.Boolean(),
@@ -477,9 +467,9 @@ export const CourseInclude = t.Partial(
     students: t.Boolean(),
     gradingCriterias: t.Boolean(),
     clos: t.Boolean(),
-    skills: t.Boolean(),
     cloSkillLevelCriterias: t.Boolean(),
     cloWeights: t.Boolean(),
+    courseSkills: t.Boolean(),
     _count: t.Boolean(),
   }),
 );

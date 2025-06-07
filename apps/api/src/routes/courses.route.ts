@@ -156,31 +156,6 @@ export const coursesRoutes = new Elysia({
             cloWeights: {
               where: { isDeleted: false },
             },
-
-            skills: {
-              where: { isDeleted: false },
-              include: {
-                skillLevels: {
-                  where: { isDeleted: false },
-                  include: {
-                    methods: {
-                      where: { isDeleted: false },
-                    },
-                    criterias: {
-                      where: { isDeleted: false },
-                      include: {
-                        cloSkillLevelCriterias: {
-                          where: { isDeleted: false },
-                          include: {
-                            clo: true,
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
           },
         });
 
@@ -221,6 +196,39 @@ export const coursesRoutes = new Elysia({
           return error("Not Found", ERROR_RESPONSES.notFound);
         }
 
+        const courseSkills = await prisma.courseSkill.findMany({
+          where: {
+            course: {
+              id: course.id,
+            },
+          },
+          include: {
+            skill: {
+              include: {
+                skillLevels: {
+                  where: { isDeleted: false },
+                  include: {
+                    methods: {
+                      where: { isDeleted: false },
+                    },
+                    criterias: {
+                      where: { isDeleted: false },
+                      include: {
+                        cloSkillLevelCriterias: {
+                          where: { isDeleted: false, courseId: course.id },
+                          include: {
+                            clo: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
         const mappedData: CourseDetailSchema = {
           ...course,
           gradingCriterias: course.gradingCriterias,
@@ -242,7 +250,7 @@ export const coursesRoutes = new Elysia({
             grading:
               studentGradings.find((sg) => sg.studentCourse.studentId === s.student.id) || null,
           })),
-          skills: course.skills,
+          skills: courseSkills.map((cs) => cs.skill),
         };
 
         return {
@@ -373,6 +381,14 @@ export const coursesRoutes = new Elysia({
             crypto.randomUUID(),
           ];
 
+          const skillId = [
+            crypto.randomUUID(),
+            crypto.randomUUID(),
+            crypto.randomUUID(),
+            crypto.randomUUID(),
+            crypto.randomUUID(),
+          ];
+
           // MOCK
           await tx.clo.createMany({
             data: [
@@ -487,7 +503,22 @@ export const coursesRoutes = new Elysia({
               descriptionTh: "คำอธิบายการเขียนโปรแกรมคอมพิวเตอร์",
               descriptionEn: "Description of Computer Programming",
               type: "SPECIFIC",
-              courseId: course.id,
+              id: skillId[0],
+            },
+          });
+
+          await tx.courseSkill.create({
+            data: {
+              course: {
+                connect: {
+                  id: course.id,
+                },
+              },
+              skill: {
+                connect: {
+                  id: skills.id,
+                },
+              },
             },
           });
 
@@ -739,7 +770,7 @@ export const coursesRoutes = new Elysia({
     {
       body: createCourseRequestSchema,
       response: {
-        200: t.Object({
+        201: t.Object({
           ...baseResponseSchema,
           data: t.Object({
             message: t.String(),

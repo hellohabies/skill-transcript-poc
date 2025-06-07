@@ -64,6 +64,11 @@ export const getStudentGradeByScore = (course: CourseDetailSchema, score: number
   const d = getGradingCriteriaByGrade(course, "D");
   const f = getGradingCriteriaByGrade(course, "F");
 
+  const isSomeZero = [a, bPlus, b, cPlus, c, dPlus, d, f].some(
+    (v) => v.minScore === 0 && v.maxScore === 0
+  );
+  if (isSomeZero) return "X";
+
   if (score >= a.minScore && score <= a.maxScore) return "A";
   if (score >= bPlus.minScore && score <= bPlus.maxScore) return "B_PLUS";
   if (score >= b.minScore && score <= b.maxScore) return "B";

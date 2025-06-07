@@ -189,6 +189,33 @@ export function SettingTabContent({ course }: SettingTabContentProps) {
     }
   }, [gradeSettings, cloWeightSettings]);
 
+  const handleApplyDefaultValue = useCallback(() => {
+    const defaultCloWeights = Object.entries(cloWeightSettings).reduce(
+      (acc, [cloWeightSettingId, cloWeightSetting]) => {
+        acc[cloWeightSettingId] = {
+          ...cloWeightSetting,
+          weight: 20,
+        };
+        return acc;
+      },
+      {} as CloWeightSettingsForm
+    );
+
+    setCloWeightSettings(defaultCloWeights);
+    setGradeSettings((prev) => ({
+      ...prev,
+      A: { min: 80, max: 100, id: prev.A?.id || "" },
+      "B+": { min: 75, max: 79, id: prev["B+"]?.id || "" },
+      B: { min: 70, max: 74, id: prev.B?.id || "" },
+      "C+": { min: 65, max: 69, id: prev["C+"]?.id || "" },
+      C: { min: 60, max: 64, id: prev.C?.id || "" },
+      "D+": { min: 55, max: 59, id: prev["D+"]?.id || "" },
+      D: { min: 50, max: 54, id: prev.D?.id || "" },
+      F: { min: 0, max: 49, id: prev.F?.id || "" },
+    }));
+    setWeightSum(100);
+  }, [cloWeightSettings]);
+
   return (
     <Card>
       <CardContent>
@@ -232,13 +259,7 @@ export function SettingTabContent({ course }: SettingTabContentProps) {
 
         <div className="flex items-center justify-end gap-4 mt-8">
           <p>รวม</p>
-          <Input
-            className={cn("w-[200px]", {
-              "border-green-500 bg-green-100": weightSum === 100,
-            })}
-            value={weightSum}
-            readOnly
-          />
+          <Input className={cn("w-[200px]")} value={weightSum} readOnly />
           <p>%</p>
         </div>
 
@@ -274,7 +295,10 @@ export function SettingTabContent({ course }: SettingTabContentProps) {
         </form>
       </CardContent>
 
-      <CardFooter className="flex justify-end mt-4">
+      <CardFooter className="flex justify-end mt-4 gap-4">
+        <Button variant="outline" onClick={handleApplyDefaultValue}>
+          ใช้ค่าเริ่มต้น
+        </Button>
         <Button onClick={handleSave}>
           <SaveIcon />
           บันทึก

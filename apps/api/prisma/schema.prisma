@@ -159,17 +159,16 @@ model Clo {
 }
 
 model Skill {
-  id                String       @id @default(cuid())
+  id                String        @id @default(cuid())
   skillMappingRefId String
   nameTh            String
   nameEn            String
   descriptionTh     String
   descriptionEn     String
   type              SkillType
-  isMainSkill       Boolean      @default(false)
-  courseId          String
-  course            Course       @relation(fields: [courseId], references: [id])
+  isMainSkill       Boolean       @default(false)
   skillLevels       SkillLevel[]
+  courseSkills      CourseSkill[]
 
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
@@ -291,9 +290,9 @@ model Course {
   students               StudentCourse[]
   gradingCriterias       CourseGradingCriteria[]
   clos                   CourseClo[]
-  skills                 Skill[]
   cloSkillLevelCriterias CloSkillLevelCriteria[]
   cloWeights             CourseCloWeight[]
+  courseSkills           CourseSkill[]
 
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
@@ -307,6 +306,20 @@ model CourseClo {
   course   Course @relation(fields: [courseId], references: [id])
   cloId    String
   clo      Clo    @relation(fields: [cloId], references: [id])
+  index    Int    @default(0)
+
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, deletedAt])
+}
+
+model CourseSkill {
+  id       String @id @default(cuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
+  skillId  String
+  skill    Skill  @relation(fields: [skillId], references: [id])
   index    Int    @default(0)
 
   isDeleted Boolean   @default(false)

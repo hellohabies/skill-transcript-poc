@@ -92,9 +92,8 @@ Table Skill {
   descriptionEn String [not null]
   type SkillType [not null]
   isMainSkill Boolean [not null, default: false]
-  courseId String [not null]
-  course Course [not null]
   skillLevels SkillLevel [not null]
+  courseSkills CourseSkill [not null]
   isDeleted Boolean [not null, default: false]
   deletedAt DateTime
 }
@@ -193,9 +192,9 @@ Table Course {
   students StudentCourse [not null]
   gradingCriterias CourseGradingCriteria [not null]
   clos CourseClo [not null]
-  skills Skill [not null]
   cloSkillLevelCriterias CloSkillLevelCriteria [not null]
   cloWeights CourseCloWeight [not null]
+  courseSkills CourseSkill [not null]
   isDeleted Boolean [not null, default: false]
   deletedAt DateTime
 }
@@ -206,6 +205,17 @@ Table CourseClo {
   course Course [not null]
   cloId String [not null]
   clo Clo [not null]
+  index Int [not null, default: 0]
+  isDeleted Boolean [not null, default: false]
+  deletedAt DateTime
+}
+
+Table CourseSkill {
+  id String [pk]
+  courseId String [not null]
+  course Course [not null]
+  skillId String [not null]
+  skill Skill [not null]
   index Int [not null, default: 0]
   isDeleted Boolean [not null, default: false]
   deletedAt DateTime
@@ -335,8 +345,6 @@ Ref: Teacher.userId - User.id
 
 Ref: Admin.userId - User.id
 
-Ref: Skill.courseId > Course.id
-
 Ref: SkillLevel.skillId > Skill.id
 
 Ref: SkillLevelMethod.skillLevelId > SkillLevel.id
@@ -362,6 +370,10 @@ Ref: Course.curriculumId > Curriculum.id
 Ref: CourseClo.courseId > Course.id
 
 Ref: CourseClo.cloId > Clo.id
+
+Ref: CourseSkill.courseId > Course.id
+
+Ref: CourseSkill.skillId > Skill.id
 
 Ref: CourseTeacher.courseId > Course.id
 

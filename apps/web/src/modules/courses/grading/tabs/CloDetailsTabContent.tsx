@@ -87,7 +87,7 @@ export function CloDetailsTabContent({ course }: CloDetailsTabContentProps) {
                           <AccordionTrigger className="text-md font-bold bg-muted-foreground/5 px-4">
                             ระดับ {skillLevel.level}
                           </AccordionTrigger>
-                          <AccordionContent className="flex flex-col gap-2 p-4 py-6 text-base text-balance w-full">
+                          <AccordionContent className="flex flex-col gap-6 p-4 py-6 text-base text-balance w-full">
                             {skillLevel.criterias.map((criteria, index) => (
                               <div className="flex flex-col gap-2" key={criteria.id}>
                                 <p className="font-semibold">

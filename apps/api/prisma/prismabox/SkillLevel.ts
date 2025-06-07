@@ -29,7 +29,6 @@ export const SkillLevelRelations = t.Object({
       t.Literal("OTHER"),
     ]),
     isMainSkill: t.Boolean(),
-    courseId: t.String(),
     isDeleted: t.Boolean(),
     deletedAt: __nullable__(t.Date()),
   }),

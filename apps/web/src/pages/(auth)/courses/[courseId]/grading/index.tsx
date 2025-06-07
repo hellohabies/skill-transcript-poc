@@ -16,6 +16,7 @@ import { Link } from "react-router";
 import { useParams } from "react-router";
 import type { CloType, Grade, GradingResult } from "../../../../../../../api/src/config/prisma";
 import { calculateStudentGradeAndScores } from "@/lib/grade";
+import { toast } from "sonner";
 
 export type GradingForm = {
   [studentId: string]: {
@@ -88,6 +89,31 @@ function CourseGradingPage() {
     setIsAllowToAnnounce(isAllow);
   }, [studentGrades]);
 
+  const handleGradeAnnouncement = async () => {
+    try {
+      const { data, error } = await api.gradings.announce.post({
+        courseId: courseId as string,
+      });
+
+      if (error) {
+        toast.error("ไม่สามารถประกาศเกรดได้", {
+          description: (error.value as { error: { message: string } }).error.message,
+        });
+        return;
+      }
+
+      if (data) {
+        toast.success("ประกาศเกรดสำเร็จ", {
+          description: "เกรดนักศึกษาในรายวิชานี้ได้ถูกประกาศเรียบร้อยแล้ว",
+        });
+        setIsAllowToAnnounce(false);
+      }
+    } catch (error) {
+      console.error("Error announcing grades:", error);
+      return;
+    }
+  };
+
   if (isLoadingCourse) {
     return <Loader />;
   }
@@ -115,7 +141,7 @@ function CourseGradingPage() {
           subtitle="บันทึกคะแนนและตัดเกรดนักศึกษาในรายวิชานี้"
         />
 
-        <Button disabled={!isAllowToAnnounce}>
+        <Button disabled={!isAllowToAnnounce} onClick={handleGradeAnnouncement}>
           <ShareIcon />
           ประกาศเกรด
         </Button>

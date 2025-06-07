@@ -4,6 +4,7 @@ import { errorResponseSchema } from "../schemas/response.schema";
 import {
   cloWeightSettingsRequestSchema,
   cloWeightSettingsResponseSchema,
+  gradeAnnouncementRequestSchema,
   gradingCriteriaRequestSchema,
   gradingCriteriaResponseSchema,
   studentGradingRequestSchema,
@@ -13,6 +14,7 @@ import { Grade, prisma } from "../config/prisma";
 import { T } from "@faker-js/faker/dist/airline-BUL6NtOJ";
 import { baseResponseSchema } from "./response";
 import { ERROR_RESPONSES } from "../error";
+import { cloResultToNumber, getStudentGradeByScore } from "../libs/grade";
 
 export const gradingsRoutes = new Elysia({
   name: "routes/v1/gradings",
@@ -190,6 +192,130 @@ export const gradingsRoutes = new Elysia({
         200: t.Object({
           ...baseResponseSchema,
           data: studentGradingResponseSchema,
+        }),
+      },
+    }
+  )
+
+  .post(
+    "/announce",
+    async ({ body, error }) => {
+      const { courseId } = body;
+
+      try {
+        const course = await prisma.course.findUnique({
+          where: {
+            id: courseId,
+          },
+        });
+
+        if (!course) return error(404, ERROR_RESPONSES.notFound);
+
+        const cloWeightSettings = await prisma.courseCloWeight.findMany({
+          where: {
+            courseId: courseId,
+          },
+        });
+
+        if (cloWeightSettings.length === 0) return error(404, ERROR_RESPONSES.notFound);
+
+        const courseGradingCriterias = await prisma.courseGradingCriteria.findMany({
+          where: {
+            courseId: courseId,
+          },
+        });
+
+        if (courseGradingCriterias.length === 0) return error(404, ERROR_RESPONSES.notFound);
+
+        const courseStudents = await prisma.studentCourse.findMany({
+          where: {
+            courseId: courseId,
+          },
+        });
+
+        const cloWeightSum = cloWeightSettings.reduce((sum, weight) => sum + 4 * weight.weight, 0);
+
+        for (const courseStudent of courseStudents) {
+          const studentId = courseStudent.studentId;
+
+          const studentCourse = await prisma.studentCourse.findFirst({
+            where: {
+              AND: {
+                courseId: courseId,
+                studentId: studentId,
+              },
+            },
+          });
+
+          const studentCourseGrading = await prisma.studentCourseGrading.findFirst({
+            where: {
+              studentCourseId: studentCourse?.id,
+            },
+            include: {
+              gradingCloResults: true,
+            },
+          });
+
+          // console.log("Student Course Grading:", studentCourseGrading);
+
+          let totalScore = 0;
+
+          for (const cloWeight of cloWeightSettings) {
+            const gradingCloResult = studentCourseGrading?.gradingCloResults.find(
+              (result) => result.cloId === cloWeight.cloId
+            );
+
+            if (gradingCloResult) {
+              const cloResultScore = cloResultToNumber(gradingCloResult.result);
+              totalScore +=
+                (gradingCloResult.result === "X" ? 0 : cloResultScore) * cloWeight.weight;
+            }
+          }
+
+          totalScore = Math.round((totalScore / cloWeightSum) * 100);
+          const grade = getStudentGradeByScore(courseGradingCriterias, totalScore);
+
+          console.log(`Student ID: ${studentId}, Total Score: ${totalScore}, Grade: ${grade}`);
+
+          await prisma.studentCourseGrading.update({
+            where: {
+              id: studentCourseGrading?.id || "",
+            },
+            data: {
+              score: totalScore,
+              grade: grade as Grade,
+              gradingDate: new Date(),
+            },
+          });
+        }
+
+        return {
+          statusCode: 201,
+          isSuccess: true,
+          data: {
+            message: "Grading have been successfully announced.",
+          },
+          error: null,
+        };
+      } catch (err) {
+        return error(500, {
+          statusCode: 500,
+          isSuccess: false,
+          error: {
+            message: err instanceof Error ? err.message : "Internal Server Error",
+          },
+          data: null,
+        });
+      }
+    },
+    {
+      body: gradeAnnouncementRequestSchema,
+      response: {
+        201: t.Object({
+          ...baseResponseSchema,
+          data: t.Object({
+            message: t.String(),
+          }),
         }),
       },
     }
