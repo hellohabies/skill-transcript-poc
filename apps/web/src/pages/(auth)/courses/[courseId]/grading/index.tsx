@@ -151,7 +151,7 @@ function CourseGradingPage() {
           />
         </TabsContent>
         <TabsContent value="setting">
-          <SettingTabContent />
+          <SettingTabContent course={course} />
         </TabsContent>
       </Tabs>
     </>

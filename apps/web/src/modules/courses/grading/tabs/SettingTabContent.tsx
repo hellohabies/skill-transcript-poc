@@ -3,21 +3,85 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SaveIcon } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import type { CourseDetailSchema } from "../../../../../../api/src/schemas/courses.schema";
+import type { Grade } from "../../../../../../api/src/config/prisma";
+import { getCloTypeLabel } from "./CloDetailsTabContent";
+import { cn } from "@/lib/utils";
 
-export function SettingTabContent() {
-  const [gradeSettings, setGradeSettings] = useState({
-    A: { min: 85, max: 100 },
-    "B+": { min: 80, max: 84 },
-    B: { min: 75, max: 79 },
-    "C+": { min: 70, max: 74 },
-    C: { min: 65, max: 69 },
-    "D+": { min: 60, max: 64 },
-    D: { min: 50, max: 59 },
-  });
+interface SettingTabContentProps {
+  course: CourseDetailSchema;
+}
+
+export type CloWeightSettingsForm = {
+  [cloId: string]: number;
+};
+
+export function gradeEnumMapping(grade: Grade): string {
+  switch (grade) {
+    case "A":
+      return "A";
+    case "B_PLUS":
+      return "B+";
+    case "B":
+      return "B";
+    case "C_PLUS":
+      return "C+";
+    case "C":
+      return "C";
+    case "D_PLUS":
+      return "D+";
+    case "D":
+      return "D";
+    case "F":
+      return "F";
+    default:
+      return ""; // Assuming 'X' is the default or unknown grade
+  }
+}
+
+export function SettingTabContent({ course }: SettingTabContentProps) {
+  const [gradeSettings, setGradeSettings] = useState<
+    Record<string, { min: number; max: number; id: string }>
+  >({});
+  const [cloWeightSettings, setCloWeightSettings] = useState<CloWeightSettingsForm>({});
+  const [weightSum, setWeightSum] = useState<number>(0);
+
+  useEffect(() => {
+    if (!course) return;
+
+    const initialGradeSettings = course.gradingCriterias
+      .filter((gc) => gc.grade !== "X")
+      .reduce(
+        (acc, setting) => {
+          acc[gradeEnumMapping(setting.grade)] = {
+            min: setting.minScore,
+            max: setting.maxScore,
+            id: setting.id,
+          };
+          return acc;
+        },
+        {} as Record<string, { min: number; max: number; id: string }>
+      );
+
+    const initialCloWeights = course.clos.reduce((acc, clo) => {
+      acc[clo.cloWeights?.id || ""] = clo.cloWeights?.weight ?? 0;
+      return acc;
+    }, {} as CloWeightSettingsForm);
+
+    const initialWeightSum = course.clos.reduce((sum, clo) => {
+      return sum + (clo.cloWeights?.weight ?? 0);
+    }, 0);
+
+    setCloWeightSettings(initialCloWeights);
+    setWeightSum(initialWeightSum);
+
+    setGradeSettings(initialGradeSettings);
+  }, [course]);
 
   const handleGradeSettingChange = (grade: string, newValue: number, type: "MIN" | "MAX") => {
     if (isNaN(newValue) || newValue < 0 || newValue > 100) newValue = 0;
+
     setGradeSettings((prev) => ({
       ...prev,
       [grade]: {
@@ -27,49 +91,91 @@ export function SettingTabContent() {
     }));
   };
 
+  const handleOnCloWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cloId = e.target.name;
+    let newWeight = parseInt(e.target.value, 10);
+
+    if (isNaN(newWeight) || newWeight < 0 || newWeight > 100) newWeight = 0;
+
+    const newWeightSum = Object.values({ ...cloWeightSettings, [cloId]: newWeight }).reduce(
+      (sum, weight) => sum + weight,
+      0
+    );
+
+    if (newWeightSum > 100) {
+      alert("สัดส่วนรวมไม่สามารถเกิน 100% ได้");
+      newWeight = 0;
+
+      setCloWeightSettings((prev) => ({
+        ...prev,
+        [cloId]: newWeight,
+      }));
+
+      return;
+    }
+
+    setCloWeightSettings((prev) => ({
+      ...prev,
+      [cloId]: newWeight,
+    }));
+
+    setWeightSum(newWeightSum);
+  };
+
+  const handleSave = useCallback(() => {
+    console.log("gradeSettings", gradeSettings);
+    console.log("cloWeightSettings", cloWeightSettings);
+  }, [gradeSettings, cloWeightSettings]);
+
   return (
     <Card>
       <CardContent>
         <p className="font-bold">สัดส่วนการคิดคะแนน</p>
         <form className="flex flex-col gap-6 mt-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <p>
-                <span className="font-bold">CLO 1.</span> อธิบายพัฒนาการองค์รวม
-                และพฤติกรรมการเรียนรู้เด็กปฐมวัยได้ถูกต้อง
-              </p>
+          {course.clos.map(({ clo, index }) => (
+            <div className="flex items-center justify-between gap-10" key={clo.id}>
+              <div className="flex items-center gap-6 w-full">
+                <p className="w-[70%]">
+                  <span className="font-bold">CLO {index + 1}</span> {clo.name}
+                </p>
 
-              <Badge>ด้านความรู้ (K - Knowledge)</Badge>
+                <div className="w-[30%] flex justify-end">
+                  <Badge
+                    className={cn("text-sm px-4 rounded-full", {
+                      "bg-blue-100 text-blue-800": clo.type === "K",
+                      "bg-green-100 text-green-800": clo.type === "S",
+                      "bg-yellow-100 text-yellow-800": clo.type === "A",
+                      "bg-gray-100 text-gray-800": !clo.type,
+                    })}
+                  >
+                    {getCloTypeLabel(clo.type)}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <p>สัดส่วน</p>
+                <Input
+                  className="w-[200px]"
+                  name={clo.id}
+                  value={cloWeightSettings[clo.id]}
+                  onChange={handleOnCloWeightChange}
+                />
+                <p>%</p>
+              </div>
             </div>
-
-            <div className="flex items-center gap-4">
-              <p>สัดส่วน</p>
-              <Input className="w-[200px]" />
-              <p>%</p>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <p>
-                <span className="font-bold">CLO 1.</span> อธิบายพัฒนาการองค์รวม
-                และพฤติกรรมการเรียนรู้เด็กปฐมวัยได้ถูกต้อง
-              </p>
-
-              <Badge>ด้านความรู้ (K - Knowledge)</Badge>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <p>สัดส่วน</p>
-              <Input className="w-[200px]" />
-              <p>%</p>
-            </div>
-          </div>
+          ))}
         </form>
 
         <div className="flex items-center justify-end gap-4 mt-8">
           <p>รวม</p>
-          <Input className="w-[200px]" />
+          <Input
+            className={cn("w-[200px]", {
+              "border-green-500 bg-green-100": weightSum === 100,
+            })}
+            value={weightSum}
+            readOnly
+          />
           <p>%</p>
         </div>
 
@@ -106,7 +212,7 @@ export function SettingTabContent() {
       </CardContent>
 
       <CardFooter className="flex justify-end mt-4">
-        <Button>
+        <Button onClick={handleSave}>
           <SaveIcon />
           บันทึก
         </Button>

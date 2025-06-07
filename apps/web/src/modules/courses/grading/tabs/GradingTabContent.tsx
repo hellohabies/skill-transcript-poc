@@ -22,6 +22,9 @@ export function GradingTabContent({
   course,
 }: GradingTabContentProps) {
   const handleGradeChange = (studentId: string, cloId: string, value: string) => {
+    const courseId = course.id;
+    // studentId // cloId // grade;
+
     setStudentGrades((prev) => {
       const updatedStudent = {
         ...prev[studentId],
@@ -49,7 +52,7 @@ export function GradingTabContent({
               <TableHead className="w-[150px]">ชื่อ</TableHead>
 
               {new Array(cloCount).fill(0).map((_, index) => (
-                <TableHead className="w-[100px]">
+                <TableHead className="w-[100px]" key={index}>
                   <div className="flex items-center gap-2">CLO {index + 1}</div>
                 </TableHead>
               ))}

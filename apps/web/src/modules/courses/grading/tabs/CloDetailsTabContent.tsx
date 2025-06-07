@@ -89,7 +89,7 @@ export function CloDetailsTabContent({ course }: CloDetailsTabContentProps) {
                           </AccordionTrigger>
                           <AccordionContent className="flex flex-col gap-2 p-4 py-6 text-base text-balance w-full">
                             {skillLevel.criterias.map((criteria, index) => (
-                              <>
+                              <div className="flex flex-col gap-2" key={criteria.id}>
                                 <p className="font-semibold">
                                   เกณท์ {skillLevel.level}.{index + 1} {criteria.criteriaNameTh}
                                 </p>
@@ -108,7 +108,7 @@ export function CloDetailsTabContent({ course }: CloDetailsTabContentProps) {
                                     );
                                   })}
                                 </div>
-                              </>
+                              </div>
                             ))}
                           </AccordionContent>
                         </AccordionItem>
