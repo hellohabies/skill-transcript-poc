@@ -5,16 +5,25 @@ import { Input } from "@/components/ui/input";
 import { SaveIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import type { CourseDetailSchema } from "../../../../../../api/src/schemas/courses.schema";
-import type { Grade } from "../../../../../../api/src/config/prisma";
+import type { CloType, Grade } from "../../../../../../api/src/config/prisma";
 import { getCloTypeLabel } from "./CloDetailsTabContent";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { api } from "@/config/api";
+import type { CloWeightSettingsRequestSchema } from "../../../../../../api/src/schemas/gradings.schema";
 
 interface SettingTabContentProps {
   course: CourseDetailSchema;
 }
 
 export type CloWeightSettingsForm = {
-  [cloId: string]: number;
+  [cloId: string]: {
+    cloIndex: number;
+    cloName: string;
+    cloType: string;
+    id: string;
+    weight: number;
+  };
 };
 
 export function gradeEnumMapping(grade: Grade): string {
@@ -64,8 +73,14 @@ export function SettingTabContent({ course }: SettingTabContentProps) {
         {} as Record<string, { min: number; max: number; id: string }>
       );
 
-    const initialCloWeights = course.clos.reduce((acc, clo) => {
-      acc[clo.cloWeights?.id || ""] = clo.cloWeights?.weight ?? 0;
+    const initialCloWeights = course.clos.reduce((acc, courseClo) => {
+      acc[courseClo.cloWeights?.id || ""] = {
+        cloIndex: courseClo.index,
+        cloName: courseClo.clo.name,
+        cloType: courseClo.clo.type,
+        id: courseClo.cloWeights?.id || "",
+        weight: courseClo.cloWeights?.weight || 0,
+      };
       return acc;
     }, {} as CloWeightSettingsForm);
 
@@ -92,15 +107,15 @@ export function SettingTabContent({ course }: SettingTabContentProps) {
   };
 
   const handleOnCloWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const cloId = e.target.name;
+    const cloWeightId = e.target.name;
     let newWeight = parseInt(e.target.value, 10);
 
     if (isNaN(newWeight) || newWeight < 0 || newWeight > 100) newWeight = 0;
 
-    const newWeightSum = Object.values({ ...cloWeightSettings, [cloId]: newWeight }).reduce(
-      (sum, weight) => sum + weight,
-      0
-    );
+    const newWeightSum = Object.values({
+      ...cloWeightSettings,
+      [cloWeightId]: { ...cloWeightSettings[cloWeightId], weight: newWeight },
+    }).reduce((sum, cloWeightSetting) => sum + cloWeightSetting.weight, 0);
 
     if (newWeightSum > 100) {
       alert("สัดส่วนรวมไม่สามารถเกิน 100% ได้");
@@ -108,7 +123,7 @@ export function SettingTabContent({ course }: SettingTabContentProps) {
 
       setCloWeightSettings((prev) => ({
         ...prev,
-        [cloId]: newWeight,
+        [cloWeightId]: { ...prev[cloWeightId], weight: newWeight },
       }));
 
       return;
@@ -116,15 +131,60 @@ export function SettingTabContent({ course }: SettingTabContentProps) {
 
     setCloWeightSettings((prev) => ({
       ...prev,
-      [cloId]: newWeight,
+      [cloWeightId]: { ...prev[cloWeightId], weight: newWeight },
     }));
 
     setWeightSum(newWeightSum);
   };
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     console.log("gradeSettings", gradeSettings);
     console.log("cloWeightSettings", cloWeightSettings);
+
+    try {
+      const updateData: CloWeightSettingsRequestSchema = Object.entries(cloWeightSettings).map(
+        ([cloWeightSettingId, cloWeightSetting]) => ({
+          courseCloWeightId: cloWeightSettingId,
+          weight: cloWeightSetting.weight,
+        })
+      );
+
+      const { data: cloWeightUpdateResponse, error: cloWeightUpdateError } =
+        await api.gradings.settings["clo-weights"].put(updateData);
+
+      if (cloWeightUpdateError && cloWeightUpdateError.value) {
+        toast.error("ไม่สามารถบันทึกการตั้งค่าได้ กรุณาลองใหม่อีกครั้ง", {
+          description: (cloWeightUpdateError.value as { error: { message: string } }).error.message,
+        });
+        return;
+      }
+
+      const gradingCriteria = Object.entries(gradeSettings).map(([, { min, max, id }]) => ({
+        courseGradingCriteriaId: id,
+        minScore: min,
+        maxScore: max,
+      }));
+
+      const { data: gradingCrtieriaUpdateResponse, error: gradingCriteriaUpdateError } =
+        await api.gradings.settings["grade-criteria"].put(gradingCriteria);
+
+      if (gradingCriteriaUpdateError && gradingCriteriaUpdateError.value) {
+        toast.error("ไม่สามารถบันทึกเกณฑ์การตัดเกรดได้ กรุณาลองใหม่อีกครั้ง", {
+          description: (gradingCriteriaUpdateError.value as { error: { message: string } }).error
+            .message,
+        });
+        return;
+      }
+
+      if (!cloWeightUpdateResponse || !gradingCrtieriaUpdateResponse) {
+        toast.error("ไม่สามารถบันทึกการตั้งค่าได้ กรุณาลองใหม่อีกครั้ง");
+        return;
+      }
+
+      toast.success("บันทึกการตั้งค่าเรียบร้อยแล้ว");
+    } catch (err) {
+      console.error("Error saving settings:", err);
+    }
   }, [gradeSettings, cloWeightSettings]);
 
   return (
@@ -132,23 +192,24 @@ export function SettingTabContent({ course }: SettingTabContentProps) {
       <CardContent>
         <p className="font-bold">สัดส่วนการคิดคะแนน</p>
         <form className="flex flex-col gap-6 mt-4">
-          {course.clos.map(({ clo, index }) => (
-            <div className="flex items-center justify-between gap-10" key={clo.id}>
+          {Object.entries(cloWeightSettings).map(([cloWeightSettingId, cloWeightSetting]) => (
+            <div className="flex items-center justify-between gap-10" key={cloWeightSettingId}>
               <div className="flex items-center gap-6 w-full">
                 <p className="w-[70%]">
-                  <span className="font-bold">CLO {index + 1}</span> {clo.name}
+                  <span className="font-bold">CLO {cloWeightSetting.cloIndex + 1}</span>{" "}
+                  {cloWeightSetting.cloName}
                 </p>
 
                 <div className="w-[30%] flex justify-end">
                   <Badge
                     className={cn("text-sm px-4 rounded-full", {
-                      "bg-blue-100 text-blue-800": clo.type === "K",
-                      "bg-green-100 text-green-800": clo.type === "S",
-                      "bg-yellow-100 text-yellow-800": clo.type === "A",
-                      "bg-gray-100 text-gray-800": !clo.type,
+                      "bg-blue-100 text-blue-800": cloWeightSetting.cloType === "K",
+                      "bg-green-100 text-green-800": cloWeightSetting.cloType === "S",
+                      "bg-yellow-100 text-yellow-800": cloWeightSetting.cloType === "A",
+                      "bg-gray-100 text-gray-800": !cloWeightSetting.cloType,
                     })}
                   >
-                    {getCloTypeLabel(clo.type)}
+                    {getCloTypeLabel(cloWeightSetting.cloType as CloType)}
                   </Badge>
                 </div>
               </div>
@@ -157,8 +218,8 @@ export function SettingTabContent({ course }: SettingTabContentProps) {
                 <p>สัดส่วน</p>
                 <Input
                   className="w-[200px]"
-                  name={clo.id}
-                  value={cloWeightSettings[clo.id]}
+                  name={cloWeightSettingId}
+                  value={cloWeightSettings[cloWeightSettingId].weight}
                   onChange={handleOnCloWeightChange}
                 />
                 <p>%</p>

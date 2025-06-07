@@ -1,4 +1,4 @@
-import { t } from "elysia";
+import { t, Static } from "elysia";
 import { softDeleteBaseSchema } from "./base.schema";
 import { Grade } from "../../prisma/prismabox/Grade";
 import { GradingResult } from "../../prisma/prismabox/GradingResult";
@@ -28,3 +28,56 @@ export const courseCloWeightBaseSchema = {
   weight: t.Number(),
   ...softDeleteBaseSchema,
 };
+
+export const cloWeightSettingsRequestSchema = t.Array(
+  t.Object({
+    courseCloWeightId: t.String(),
+    weight: t.Number(),
+  })
+);
+
+export const cloWeightSettingsResponseSchema = t.Array(
+  t.Object({
+    courseCloWeightId: t.String(),
+    weight: t.Number(),
+  })
+);
+
+export const gradingCriteriaRequestSchema = t.Array(
+  t.Object({
+    courseGradingCriteriaId: t.String(),
+    minScore: t.Number(),
+    maxScore: t.Number(),
+  })
+);
+
+export const gradingCriteriaResponseSchema = t.Array(
+  t.Object({
+    courseGradingCriteriaId: t.String(),
+    minScore: t.Number(),
+    maxScore: t.Number(),
+  })
+);
+
+export const studentGradingRequestSchema = t.Object({
+  courseId: t.String(),
+  studentId: t.String(),
+  cloId: t.String(),
+  grade: GradingResult,
+});
+
+export const studentGradingResponseSchema = t.Object({
+  courseId: t.String(),
+  studentId: t.String(),
+  cloId: t.String(),
+  grade: GradingResult,
+});
+
+export type CloWeightSettingsRequestSchema = Static<typeof cloWeightSettingsRequestSchema>;
+export type CloWeightSettingsResponseSchema = Static<typeof cloWeightSettingsResponseSchema>;
+
+export type GradingCriteriaRequestSchema = Static<typeof gradingCriteriaRequestSchema>;
+export type GradingCriteriaResponseSchema = Static<typeof gradingCriteriaResponseSchema>;
+
+export type StudentGradingRequestSchema = Static<typeof studentGradingRequestSchema>;
+export type StudentGradingResponseSchema = Static<typeof studentGradingResponseSchema>;
