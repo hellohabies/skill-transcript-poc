@@ -92,3 +92,5 @@ export const studentSkillsResponseSchema = t.Object({
 });
 
 export type StudentResponse = Static<typeof studentResponseSchema>;
+
+export type StudentSkillsResponse = Static<typeof studentSkillsResponseSchema>;

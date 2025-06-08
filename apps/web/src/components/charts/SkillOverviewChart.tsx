@@ -1,6 +1,6 @@
 "use client";
 
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from "recharts";
+import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart } from "recharts";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -9,15 +9,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-
-const chartData = [
-  { month: "Coding", level: 186 },
-  { month: "AI", level: 305 },
-  { month: "Leadership", level: 237 },
-  { month: "Presentation", level: 273 },
-  { month: "Problem Solving", level: 209 },
-  { month: "Digital Literacy", level: 214 },
-];
+import type { StudentSkillsResponse } from "../../../../api/src/schemas/student.schema";
+import { useMemo } from "react";
 
 const chartConfig = {
   level: {
@@ -26,7 +19,20 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function SkillOverviewChart() {
+interface SkillOverviewChartProps {
+  studentSkills: StudentSkillsResponse;
+}
+
+export default function SkillOverviewChart({ studentSkills }: SkillOverviewChartProps) {
+  const chartData = useMemo(
+    () =>
+      studentSkills.skillsWithLevels.map((swl) => ({
+        skillName: swl.nameEn,
+        level: swl.finalLevel,
+      })),
+    [studentSkills.skillsWithLevels]
+  );
+
   return (
     <Card className="shadow-sm">
       <CardHeader className="items-center pb-4">
@@ -37,8 +43,9 @@ export default function SkillOverviewChart() {
         <ChartContainer config={chartConfig} className="mx-auto max-h-[300px]">
           <RadarChart data={chartData}>
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <PolarAngleAxis dataKey="month" />
+            <PolarAngleAxis dataKey="skillName" />
             <PolarGrid />
+            <PolarRadiusAxis domain={[0, 3]} tick={false} tickCount={3} className="hidden" />
             <Radar dataKey="level" fill="hsla(21 96% 45% / 0.8)" fillOpacity={0.6} />
           </RadarChart>
         </ChartContainer>
