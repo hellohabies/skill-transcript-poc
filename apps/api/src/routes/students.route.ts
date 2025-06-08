@@ -184,11 +184,68 @@ export const studentsRoutes = new Elysia({
           });
         }
 
+        const crteriaIdAndCourseIdToCloMap = new Map<
+          string,
+          { clo: Clo; isPass: boolean; courseCode: string; courseName: string }[]
+        >();
+
+        const x = [];
+
+        for (const courseSkill of coursesAndCloResults.flatMap((course) => course.courseSkills)) {
+          for (const skillLevel of courseSkill.skillLevels) {
+            for (const criteria of skillLevel.criterias) {
+              const courseId = criteria.cloSkillLevelCriterias[0].courseId;
+
+              const course = await prisma.course.findUnique({
+                where: {
+                  id: courseId,
+                  isDeleted: false,
+                },
+              });
+
+              const prev = crteriaIdAndCourseIdToCloMap.get(
+                `${criteria.id}::${courseSkill.skillId}`
+              );
+              if (prev) {
+                prev.push(
+                  ...criteria.cloSkillLevelCriterias.map((clc) => ({
+                    clo: clc.clo,
+                    isPass: clc.isPass,
+                    courseCode: course?.courseCode ?? "",
+                    courseName: course?.nameEn ?? "",
+                  }))
+                );
+              } else {
+                crteriaIdAndCourseIdToCloMap.set(
+                  `${criteria.id}::${courseSkill.skillId}`,
+                  criteria.cloSkillLevelCriterias.map((clc) => ({
+                    clo: clc.clo,
+                    isPass: clc.isPass,
+                    courseCode: course?.courseCode ?? "",
+                    courseName: course?.nameEn ?? "",
+                  }))
+                );
+              }
+            }
+          }
+        }
+
+        const xx = skillsWithLevels.map((skill) => ({
+          ...skill,
+          skillLevels: skill.skillLevels?.map((sl) =>
+            sl.criterias.map((c) => ({
+              ...c,
+              criterias: crteriaIdAndCourseIdToCloMap.get(`${c.id}::${skill.id}`),
+            }))
+          ),
+        }));
+
         return {
           statusCode: 200,
           isSuccess: true,
           data: {
-            skillsWithLevels: skillsWithLevels,
+            // s: Array.from(crteriaIdAndCourseIdToCloMap.keys()),
+            skillsWithLevels: xx,
             coursesAndCloResults: coursesAndCloResults,
           },
           error: null,
