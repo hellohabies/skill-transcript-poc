@@ -108,9 +108,14 @@ export function SkillLevelOverviewChart({}: SkillLevelOverviewChartProps) {
                     <div>
                       <p className="font-semibold">เกณท์ 1.1 เข้าใจแนวคิดพื้นฐานของทักษะ</p>
                       <div className="mt-2">
-                        <div className="flex items-center gap-2">
-                          <CircleCheckIcon size={16} color="#00a63e" strokeWidth={3} />
-                          <p>CLO 4 สามารถประยุกต์ใช้ปัญญาประดิษฐ์ในการแก้ปัญหาได้</p>
+                        <div className="flex items-center gap-3">
+                          <CircleCheckIcon size={20} color="#00a63e" strokeWidth={3} />
+                          <div>
+                            <p>CLO 4 สามารถประยุกต์ใช้ปัญญาประดิษฐ์ในการแก้ปัญหาได้</p>
+                            <p className="text-muted-foreground">
+                              วิชา : CS201 Introduction to Artificial Intelligence
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -118,9 +123,14 @@ export function SkillLevelOverviewChart({}: SkillLevelOverviewChartProps) {
                     <div>
                       <p className="font-semibold">เกณท์ 1.1 เข้าใจแนวคิดพื้นฐานของทักษะ</p>
                       <div className="mt-2">
-                        <div className="flex items-center gap-2">
-                          <CircleCheckIcon size={16} color="#00a63e" strokeWidth={3} />
-                          <p>CLO 4 สามารถประยุกต์ใช้ปัญญาประดิษฐ์ในการแก้ปัญหาได้</p>
+                        <div className="flex items-center gap-3">
+                          <CircleCheckIcon size={20} color="#00a63e" strokeWidth={3} />
+                          <div>
+                            <p>CLO 4 สามารถประยุกต์ใช้ปัญญาประดิษฐ์ในการแก้ปัญหาได้</p>
+                            <p className="text-muted-foreground">
+                              วิชา : CS201 Introduction to Artificial Intelligence
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
