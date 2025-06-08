@@ -143,11 +143,54 @@ export const studentsRoutes = new Elysia({
         const { studentId } = params;
 
         const coursesAndCloResults = await getStudentCoursesAndCloResults(studentId);
+        if (!coursesAndCloResults) return error(404, ERROR_RESPONSES.notFound);
+
+        const studentSkillIds = coursesAndCloResults
+          .map((course) => course.courseSkills)
+          .flat()
+          .map((cs) => cs.skillId);
+
+        const uniqueStudentSkills = Array.from(new Set(studentSkillIds));
+        const skillsWithLevels = [];
+
+        for (const skillId of uniqueStudentSkills) {
+          const skill = await prisma.skill.findUnique({
+            where: {
+              id: skillId,
+            },
+            include: {
+              skillLevels: {
+                select: {
+                  skillId: true,
+                  criterias: {
+                    select: {
+                      id: true,
+                      criteriaNameTh: true,
+                      criteriaNameEn: true,
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+          const levels = coursesAndCloResults
+            .map((course) => ({ ...course.courseSkills.find((cs) => cs.skillId === skillId) }))
+            .map((sl) => (sl.studentLevel !== undefined ? sl.studentLevel : 0));
+
+          skillsWithLevels.push({
+            finalLevel: Math.min(...levels),
+            ...skill,
+          });
+        }
 
         return {
           statusCode: 200,
           isSuccess: true,
-          data: coursesAndCloResults,
+          data: {
+            skillsWithLevels: skillsWithLevels,
+            coursesAndCloResults: coursesAndCloResults,
+          },
           error: null,
         };
       } catch (err) {
@@ -371,9 +414,7 @@ async function getStudentCoursesAndCloResults(studentId: string) {
       studentCourseGradingAndCloResults,
     ]);
 
-    if (!cslc || !sclc) {
-      return error(404, ERROR_RESPONSES.notFound);
-    }
+    if (!cslc || !sclc) continue;
 
     const result = {
       id: cslc.id,
