@@ -11,6 +11,7 @@ export type Path =
   | `/faculties/:facultyId/curriculums/:curriculumId`
   | `/faculties/:facultyId/curriculums/:curriculumId/assign`
   | `/home`
+  | `/skills`
 
 export type Params = {
   '/courses/:courseId/grading': { courseId: string }
