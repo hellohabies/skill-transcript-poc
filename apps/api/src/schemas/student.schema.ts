@@ -58,4 +58,37 @@ export const studentResponseSchema = t.Array(
   })
 );
 
+export const studentSkillsResponseSchema = t.Object({
+  skillsWithLevels: t.Array(
+    t.Object({
+      finalLevel: t.Number(),
+      nameEn: t.String(),
+      nameTh: t.String(),
+      descriptionTh: t.String(),
+      descriptionEn: t.String(),
+      type: t.String(),
+      isMainSkill: t.Boolean(),
+      skillLevels: t.Array(
+        t.Array(
+          t.Object({
+            id: t.String(),
+            criteriaNameTh: t.String(),
+            criteriaNameEn: t.String(),
+            criterias: t.Array(
+              t.Object({
+                isPass: t.Boolean(),
+                courseCode: t.String(),
+                courseName: t.String(),
+                clo: t.Object({
+                  ...cloBaseSchema,
+                }),
+              })
+            ),
+          })
+        )
+      ),
+    })
+  ),
+});
+
 export type StudentResponse = Static<typeof studentResponseSchema>;

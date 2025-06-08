@@ -3,7 +3,11 @@ import { authPlugin } from "../middlewares/auth";
 import { errorResponseSchema } from "../schemas/response.schema";
 import { Clo, GradingCloResult, prisma } from "../config/prisma";
 import { baseResponseSchema } from "./response";
-import { StudentResponse, studentResponseSchema } from "../schemas/student.schema";
+import {
+  StudentResponse,
+  studentResponseSchema,
+  studentSkillsResponseSchema,
+} from "../schemas/student.schema";
 import { ERROR_RESPONSES } from "../error";
 
 export const studentsRoutes = new Elysia({
@@ -189,8 +193,6 @@ export const studentsRoutes = new Elysia({
           { clo: Clo; isPass: boolean; courseCode: string; courseName: string }[]
         >();
 
-        const x = [];
-
         for (const courseSkill of coursesAndCloResults.flatMap((course) => course.courseSkills)) {
           for (const skillLevel of courseSkill.skillLevels) {
             for (const criteria of skillLevel.criterias) {
@@ -246,7 +248,7 @@ export const studentsRoutes = new Elysia({
           data: {
             // s: Array.from(crteriaIdAndCourseIdToCloMap.keys()),
             skillsWithLevels: xx,
-            coursesAndCloResults: coursesAndCloResults,
+            // coursesAndCloResults: coursesAndCloResults,
           },
           error: null,
         };
@@ -265,7 +267,7 @@ export const studentsRoutes = new Elysia({
       response: {
         200: t.Object({
           ...baseResponseSchema,
-          data: t.Any(),
+          data: studentSkillsResponseSchema,
         }),
       },
     }
