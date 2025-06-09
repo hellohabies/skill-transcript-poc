@@ -19,13 +19,13 @@ WORKDIR /app
 COPY . .
 
 # ติดตั้ง deps ด้วย Bun
-RUN bun install
+RUN pnpm install
 
 # Inject Prisma env
 RUN echo "DATABASE_URL=${DATABASE_PUBLIC_URL}" > .env
 
 # ใช้ pnpm แค่ขั้นตอน prisma
-RUN cd apps/api && pnpm run db:migrate:deploy && pnpm run db:generate
+RUN cd apps/api && pnpm install && pnpm run db:migrate:deploy && pnpm run db:generate
 # RUN pnpm turbo db:migrate:deploy
 # RUN pnpm turbo db:generate
 
