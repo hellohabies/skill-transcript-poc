@@ -28,7 +28,7 @@ function Page() {
   }
 
   return (
-    <>
+    <div className="px-10 pb-20">
       <PageTitleSubtitle
         title="Skill Transcript"
         subtitle="ดูผลการเรียนของคุณในแต่ละรายวิชาที่ลงทะเบียนเรียน ในรูปแบบ Skill Transcript"
@@ -41,7 +41,7 @@ function Page() {
       <div className="mt-7">
         <SkillLevelOverviewChart studentSkills={studentSkills} />
       </div>
-    </>
+    </div>
   );
 }
 

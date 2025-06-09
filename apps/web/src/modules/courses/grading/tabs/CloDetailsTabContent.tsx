@@ -44,7 +44,7 @@ export function CloDetailsTabContent({ course }: CloDetailsTabContentProps) {
                 key={clo.id}
               >
                 <div className="flex flex-row gap-2">
-                  <p className="font-bold">CLO {index + 1}</p>
+                  <p className="font-bold">CLO {index}</p>
                   <p>{clo.name}</p>
                 </div>
 
@@ -102,7 +102,7 @@ export function CloDetailsTabContent({ course }: CloDetailsTabContentProps) {
                                       <div className="flex items-center gap-2">
                                         <CircleIcon size={6} className="bg-black rounded-full" />
                                         <p>
-                                          CLO {cloIndex + 1} {clo.name}
+                                          CLO {cloIndex} {clo.name}
                                         </p>
                                       </div>
                                     );

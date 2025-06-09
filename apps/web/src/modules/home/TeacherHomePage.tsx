@@ -50,7 +50,7 @@ function TeacherHomePage() {
           <CardDescription>
             อาจารย์ประจำหลักสูตร{authUser?.teacher?.affiliatedCurriculum.degreeName} / สาขา
             {authUser?.teacher?.affiliatedCurriculum.programName} / คณะ
-            {authUser?.teacher?.affiliatedCurriculum.faculty.name} / มหาวิทยาลัย
+            {authUser?.teacher?.affiliatedCurriculum.faculty.name} / {""}
             {authUser?.teacher?.affiliatedCurriculum.faculty.university.name}
           </CardDescription>
         </CardHeader>

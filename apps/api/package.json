@@ -11,8 +11,9 @@
     "db:generate": "prisma generate",
     "db:seed:admin": "ts-node src/seed/admin.ts",
     "db:seed:npru": "ts-node src/seed/npru.ts",
+    "db:seed:kmitl": "ts-node src/seed/kmitl.ts",
     "db:migrate:reset": "prisma migrate reset --force --skip-seed",
-    "db:migrate:reset:seed": "prisma migrate reset --force --skip-seed && ts-node src/seed/admin.ts && ts-node src/seed/npru.ts",
+    "db:migrate:reset:seed": "pnpm db:migrate:reset && pnpm db:seed:admin && pnpm db:seed:npru && pnpm db:seed:kmitl",
     "db:studio": "prisma studio"
   },
   "keywords": [],

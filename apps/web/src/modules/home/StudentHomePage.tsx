@@ -41,7 +41,7 @@ function StudentHomePage() {
   }
 
   return (
-    <>
+    <div className="px-10 pb-20">
       <Card className="mb-7 shadow-xs">
         <CardHeader>
           <CardTitle>
@@ -50,14 +50,14 @@ function StudentHomePage() {
           <CardDescription>
             นักศึกษาประจำหลักสูตร{authUser?.teacher?.affiliatedCurriculum.degreeName} / สาขา
             {authUser?.student?.affiliatedCurriculum.programName} / คณะ
-            {authUser?.student?.affiliatedCurriculum.faculty.name} / มหาวิทยาลัย
+            {authUser?.student?.affiliatedCurriculum.faculty.name} / {""}
             {authUser?.student?.affiliatedCurriculum.faculty.university.name}
           </CardDescription>
         </CardHeader>
       </Card>
 
       <PageTitleSubtitle title="หน้าแรก" subtitle="ยินดีต้อนรับสู่ระบบ Skill Transcript" />
-
+      {/* 
       <div className="grid grid-cols-3 my-7">
         <Card className=" shadow-xs">
           <CardHeader>
@@ -68,12 +68,14 @@ function StudentHomePage() {
             </p>
           </CardHeader>
         </Card>
-      </div>
+      </div> */}
+
+      <div className="my-7"></div>
 
       <PageTitleSubtitle title="ผลการเรียนรายวิชา" subtitle="" />
 
       <div className="my-7">
-        <Table className="text-base">
+        <Table>
           <TableHeader className="bg-gray-100">
             <TableRow>
               <TableHead className="text-center">ลำดับ</TableHead>
@@ -112,7 +114,7 @@ function StudentHomePage() {
               </CardTitle>
 
               {courseClo.gradingCloResults.map((gradingClo) => (
-                <div className="flex items-center justify-between mt-4 ">
+                <div className="flex items-center justify-between mt-4 text-sm">
                   <div className="flex items-center gap-2 w-[70%] justify-between">
                     <p>
                       <span className="font-medium">CLO {gradingClo.index + 1}</span>{" "}
@@ -141,7 +143,7 @@ function StudentHomePage() {
           </Card>
         ))}
       </div>
-    </>
+    </div>
   );
 }
 
