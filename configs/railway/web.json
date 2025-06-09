@@ -1,0 +1,8 @@
+{
+    "$schema": "https://railway.com/railway.schema.json",
+    "build": {
+        "builder": "DOCKERFILE",
+        "buildCommand": "docker build --build-arg VITE_BACKEND_URL=http://localhost:3333 -f apps/web/Dockerfile -t skill-transcript-poc-web .",
+        "dockerfilePath": "apps/web/Dockerfile"
+    }
+}

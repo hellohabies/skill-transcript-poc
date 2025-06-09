@@ -4,7 +4,7 @@
   "main": "./src/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc src/index.ts --outDir dist",
+    "build": "tsup src/index.ts --out-dir dist",
     "start": "NODE_ENV=production node dist/index.js",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
