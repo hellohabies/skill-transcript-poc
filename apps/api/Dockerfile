@@ -25,8 +25,9 @@ RUN bun install
 RUN echo "DATABASE_URL=${DATABASE_PUBLIC_URL}" > .env
 
 # ใช้ pnpm แค่ขั้นตอน prisma
-RUN pnpm turbo db:migrate:deploy
-RUN pnpm turbo db:generate
+RUN cd apps/api && pnpm run db:migrate:deploy && pnpm run db:generate
+# RUN pnpm turbo db:migrate:deploy
+# RUN pnpm turbo db:generate
 
 EXPOSE 3333
 

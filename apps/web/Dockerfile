@@ -5,7 +5,7 @@ FROM node:20-slim AS build
 WORKDIR /app
 
 # Define build arguments with default values
-ARG VITE_BACKEND_URL=""
+ARG VITE_BACKEND_URL="http://st-poc-api.up.railway.app/"
 ARG NODE_ENV=production
 ARG VITE_NODE_ENV=production
 
